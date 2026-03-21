@@ -35,14 +35,6 @@ export default function Producto() {
     <div className="min-h-screen bg-gradient-to-b from-gray-300 via-gray-100 to-white text-gray-900">
       <div className="max-w-5xl mx-auto p-4 sm:p-6">
 
-        {/* BOTÓN VOLVER */}
-        <a
-          href="/"
-          className="inline-block mb-4 sm:mb-6 text-green-700 hover:text-green-900 font-semibold text-sm sm:text-base"
-        >
-          ← Volver a la página principal
-        </a>
-
         {/* TÍTULO */}
         <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center px-2">
           ESCANCIADOR DE SIDRA, automático a batería
