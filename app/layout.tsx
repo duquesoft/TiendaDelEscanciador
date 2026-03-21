@@ -43,9 +43,10 @@ export default function RootLayout({
 
           <a
             href="/"
-            className="text-green-700 hover:text-green-900 font-semibold text-xs sm:text-sm whitespace-nowrap"
+            className="text-green-700 hover:text-green-900 font-semibold text-lg sm:text-xl whitespace-nowrap"
+
           >
-            ← Volver
+            ← Pagina principal
           </a>
 
           <div className="flex items-center gap-2 sm:gap-3">
