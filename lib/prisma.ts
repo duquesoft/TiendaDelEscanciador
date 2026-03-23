@@ -1,13 +1,9 @@
-import { PrismaClient } from '@prisma/client'
+// Este archivo se mantiene por compatibilidad con la estructura del proyecto
+// El proyecto usa Supabase directamente, no Prisma
 
-const globalForPrisma = global
+// Si necesitas una instancia de Supabase, usa:
+// import { createClient } from '@/lib/supabase/server'
+// o
+// import { createClient } from '@/lib/supabase/client'
 
-const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-    log: ['query'],
-  })
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
-
-export default prisma
+export default null
