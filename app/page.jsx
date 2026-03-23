@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+// trigger redeploy
 
 export default function Home() {
   const imagenesIzquierda = [
