@@ -2,10 +2,6 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 
-/**
- * GET /api/users
- * Obtener todos los usuarios (requiere autenticación admin)
- */
 export async function GET() {
   try {
     const supabase = await createClient()
@@ -28,7 +24,6 @@ export async function GET() {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
     }
 
-    // Cliente admin para listar usuarios
     const supabaseAdmin = createAdminClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -53,10 +48,6 @@ export async function GET() {
   }
 }
 
-/**
- * POST /api/users
- * Crear un usuario usando service_role (SIEMPRE funciona)
- */
 export async function POST(req: NextRequest) {
   try {
     const { email, password, name, lastname, phone, address } = await req.json()
@@ -68,11 +59,14 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Cliente admin con service_role
+    console.log("SERVICE ROLE KEY (primeros 15 chars):", process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 15))
+
     const supabaseAdmin = createAdminClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
+
+    console.log("ADMIN CLIENT CREATED WITH KEY LENGTH:", process.env.SUPABASE_SERVICE_ROLE_KEY?.length)
 
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email,
@@ -91,7 +85,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
+    console.log("USER CREATED IN AUTH:", data.user.id)
+
+    // INSERT CORREGIDO
+    const insertUser = await supabaseAdmin.from("users").insert({
+      id: data.user.id,
+      email,
+      password: null,
+      name,
+      lastname,
+      phone,
+      address,
+      createdat: new Date(),
+      updatedat: new Date()
+    })
+
+    console.log("INSERT INTO users RESULT:", insertUser)
+
+    const insertRole = await supabaseAdmin.from("user_roles").insert({
+      user_id: data.user.id,
+      role: "user"
+    })
+
+    console.log("INSERT INTO user_roles RESULT:", insertRole)
+
     return NextResponse.json({ user: data.user }, { status: 201 })
+
   } catch (error) {
     console.error('Error:', error)
     return NextResponse.json(

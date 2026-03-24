@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { User } from '@supabase/supabase-js'
-import { checkAdminAccess, getAllUsers, getAdminStats } from '@/lib/supabase/admin'
+import { getAllUsers, getAdminStats } from '@/lib/supabase/admin'
 import Link from 'next/link'
 
 interface AdminStats {
@@ -13,7 +12,7 @@ interface AdminStats {
 }
 
 export default function AdminDashboard() {
-  const [users, setUsers] = useState<User[]>([])
+  const [users, setUsers] = useState<any[]>([])
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -60,6 +59,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="max-w-7xl mx-auto p-6">
+
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Panel de Administrador</h1>
@@ -95,6 +95,7 @@ export default function AdminDashboard() {
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-xl font-bold text-gray-900">Usuarios Registrados ({users.length})</h2>
           </div>
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
@@ -106,17 +107,28 @@ export default function AdminDashboard() {
                   <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Acciones</th>
                 </tr>
               </thead>
+
               <tbody>
                 {users.map((user) => (
                   <tr key={user.id} className="border-b border-gray-200 hover:bg-gray-50">
                     <td className="px-6 py-4 text-sm text-gray-900">{user.email}</td>
+
                     <td className="px-6 py-4 text-sm text-gray-900">
-                      {user.user_metadata?.name || 'N/A'} {user.user_metadata?.lastname || ''}
+                      {user.name || user.lastname
+                        ? `${user.name ?? ''} ${user.lastname ?? ''}`.trim()
+                        : 'Sin nombre'}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{user.user_metadata?.phone || 'N/A'}</td>
+
                     <td className="px-6 py-4 text-sm text-gray-900">
-                      {new Date(user.created_at).toLocaleDateString('es-ES')}
+                      {user.phone ?? 'Sin teléfono'}
                     </td>
+
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {user.createdat
+                        ? new Date(user.createdat).toLocaleDateString('es-ES')
+                        : 'Fecha no disponible'}
+                    </td>
+
                     <td className="px-6 py-4 text-sm">
                       <Link
                         href={`/admin/usuarios/${user.id}`}
@@ -128,6 +140,7 @@ export default function AdminDashboard() {
                   </tr>
                 ))}
               </tbody>
+
             </table>
           </div>
         </div>
@@ -143,6 +156,7 @@ export default function AdminDashboard() {
               <p className="text-lg font-semibold text-blue-600">Ver todos los pedidos</p>
               <p className="text-sm text-gray-600 mt-1">Gestiona todos los pedidos del sistema</p>
             </Link>
+
             <Link
               href="/admin/reportes"
               className="block p-4 border-2 border-green-600 rounded-lg text-center hover:bg-green-50 transition"
@@ -152,6 +166,7 @@ export default function AdminDashboard() {
             </Link>
           </div>
         </div>
+
       </div>
     </div>
   )

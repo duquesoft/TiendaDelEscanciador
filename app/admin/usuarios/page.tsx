@@ -50,6 +50,23 @@ export default function AdminUsersPage() {
     }
   }
 
+  const deleteUser = async (id: string) => {
+    if (!confirm("¿Seguro que quieres eliminar este usuario?")) return
+
+    const res = await fetch("/api/admin/users/delete", {
+      method: "POST",
+      body: JSON.stringify({ id })
+    })
+
+    if (res.ok) {
+      setUsers(users.filter(u => u.id !== id))
+      setSelectedUser(null)
+      alert("Usuario eliminado")
+    } else {
+      alert("Error eliminando usuario")
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -85,7 +102,7 @@ export default function AdminUsersPage() {
                 >
                   <p className="font-medium text-gray-900">{user.email}</p>
                   <p className="text-sm text-gray-600">
-                    {user.user_metadata?.name} {user.user_metadata?.lastname}
+                    {user.name} {user.lastname}
                   </p>
                 </button>
               ))}
@@ -104,15 +121,29 @@ export default function AdminUsersPage() {
                       const user = users.find((u) => u.id === selectedUser)
                       return (
                         <div className="space-y-2 text-gray-600">
-                          <p>
-                            <span className="font-medium">Email:</span> {user?.email}
-                          </p>
-                          <p>
-                            <span className="font-medium">Nombre:</span> {user?.user_metadata?.name}
-                          </p>
-                          <p>
-                            <span className="font-medium">Apellido:</span> {user?.user_metadata?.lastname}
-                          </p>
+                          <p><span className="font-medium">Email:</span> {user?.email}</p>
+                          <p><span className="font-medium">Nombre:</span> {user?.name}</p>
+                          <p><span className="font-medium">Apellido:</span> {user?.lastname}</p>
+                          <p><span className="font-medium">Teléfono:</span> {user?.phone || 'No disponible'}</p>
+                          <p><span className="font-medium">Dirección:</span> {user?.address || 'No disponible'}</p>
+                          <p><span className="font-medium">Fecha registro:</span> {new Date(user?.createdat).toLocaleString()}</p>
+                          <p><span className="font-medium">Rol:</span> {user?.user_roles?.role || 'user'}</p>
+
+                          <div className="flex gap-3 mt-4">
+                            <Link
+                              href={`/admin/usuarios/${user.id}/editar`}
+                              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                            >
+                              Editar
+                            </Link>
+
+                            <button
+                              onClick={() => deleteUser(user.id)}
+                              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                            >
+                              Eliminar
+                            </button>
+                          </div>
                         </div>
                       )
                     })()}
@@ -149,15 +180,15 @@ export default function AdminUsersPage() {
                                     order.status === 'pending'
                                       ? 'bg-yellow-100 text-yellow-800'
                                       : order.status === 'completed'
-                                        ? 'bg-green-100 text-green-800'
-                                        : 'bg-red-100 text-red-800'
+                                      ? 'bg-green-100 text-green-800'
+                                      : 'bg-red-100 text-red-800'
                                   }`}
                                 >
                                   {order.status === 'pending'
                                     ? 'Pendiente'
                                     : order.status === 'completed'
-                                      ? 'Completado'
-                                      : 'Cancelado'}
+                                    ? 'Completado'
+                                    : 'Cancelado'}
                                 </span>
                               </td>
                             </tr>

@@ -31,18 +31,37 @@ export async function checkAdminAccess() {
 export async function getAllUsers() {
   const supabase = await createClient()
 
-  // Primero verificar acceso admin
   await checkAdminAccess()
 
-  // Obtener usuarios de Supabase Authentication
-  const { data, error } = await supabase.auth.admin.listUsers()
+  const { data: users, error: usersError } = await supabase
+    .from("users")
+    .select("*")
+    .order("createdat", { ascending: false })
 
-  if (error) {
-    console.error('Error fetching users:', error)
+  if (usersError) {
+    console.error("Error fetching users:", usersError)
     return []
   }
 
-  return data.users || []
+  const { data: roles, error: rolesError } = await supabase
+    .from("user_roles")
+    .select("user_id, role")
+
+  if (rolesError) {
+    console.error("Error fetching roles:", rolesError)
+    return users.map(u => ({ ...u, role: "user" }))
+  }
+
+  const usersWithRoles = users.map(user => {
+    const role = roles.find(r =>
+      String(r.user_id).trim().toLowerCase() ===
+      String(user.id).trim().toLowerCase()
+    )?.role || "user"
+
+    return { ...user, role }
+  })
+
+  return usersWithRoles
 }
 
 export async function getAllOrders() {
