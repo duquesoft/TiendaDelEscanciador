@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 
 /**
  * GET /api/users
@@ -9,7 +10,6 @@ export async function GET() {
   try {
     const supabase = await createClient()
 
-    // Obtener usuario autenticado
     const {
       data: { user },
     } = await supabase.auth.getUser()
@@ -18,7 +18,6 @@ export async function GET() {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
     }
 
-    // Verificar si es admin
     const { data: userRole } = await supabase
       .from('user_roles')
       .select('role')
@@ -29,8 +28,13 @@ export async function GET() {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
     }
 
-    // Obtener todos los usuarios
-    const { data: userData, error } = await supabase.auth.admin.listUsers()
+    // Cliente admin para listar usuarios
+    const supabaseAdmin = createAdminClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    const { data: userData, error } = await supabaseAdmin.auth.admin.listUsers()
 
     if (error) {
       return NextResponse.json(
@@ -51,7 +55,7 @@ export async function GET() {
 
 /**
  * POST /api/users
- * Crear un usuario (vía Supabase Auth)
+ * Crear un usuario usando service_role (SIEMPRE funciona)
  */
 export async function POST(req: NextRequest) {
   try {
@@ -64,27 +68,30 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    // Cliente admin con service_role
+    const supabaseAdmin = createAdminClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
 
-    // Crear usuario
-    const { data: authData, error } = await supabase.auth.signUp({
+    const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
-      options: {
-        data: {
-          name,
-          lastname,
-          phone,
-          address,
-        },
+      email_confirm: true,
+      user_metadata: {
+        name,
+        lastname,
+        phone,
+        address,
       },
     })
 
     if (error) {
+      console.log("ERROR SUPABASE:", error)
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
-    return NextResponse.json({ user: authData.user }, { status: 201 })
+    return NextResponse.json({ user: data.user }, { status: 201 })
   } catch (error) {
     console.error('Error:', error)
     return NextResponse.json(

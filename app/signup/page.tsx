@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 
 export default function SignupPage() {
@@ -18,7 +17,6 @@ export default function SignupPage() {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClient()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -47,28 +45,29 @@ export default function SignupPage() {
     }
 
     try {
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            name: formData.name,
-            lastname: formData.lastname,
-            phone: formData.phone,
-            address: formData.address,
-          },
-        },
+      // 👉 AHORA SÍ: llamamos a tu API /api/users
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          name: formData.name,
+          lastname: formData.lastname,
+          phone: formData.phone,
+          address: formData.address,
+        }),
       })
 
-      if (signUpError) {
-        setError(signUpError.message)
+      const result = await res.json()
+
+      if (!res.ok) {
+        setError(result.error || 'Error al crear la cuenta')
         return
       }
 
-      // Opcionalmente, iniciar sesión automáticamente después del registro
-      if (data?.user) {
-        router.push('/login?message=Account created. Please check your email for confirmation.')
-      }
+      // Usuario creado correctamente → redirigir
+      router.push('/login?message=Account created')
     } catch (err) {
       setError('Error al crear la cuenta')
     } finally {
@@ -84,6 +83,7 @@ export default function SignupPage() {
             Crear nueva cuenta
           </h2>
         </div>
+
         <form className="mt-8 space-y-6" onSubmit={handleSignup}>
           {error && (
             <div className="rounded-md bg-red-50 p-4">
@@ -92,129 +92,89 @@ export default function SignupPage() {
           )}
 
           <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Correo electrónico"
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </div>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              placeholder="Correo electrónico"
+              className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300"
+              value={formData.email}
+              onChange={handleChange}
+            />
 
-            <div>
-              <label htmlFor="name" className="sr-only">
-                Nombre
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Nombre"
-                value={formData.name}
-                onChange={handleChange}
-              />
-            </div>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              required
+              placeholder="Nombre"
+              className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300"
+              value={formData.name}
+              onChange={handleChange}
+            />
 
-            <div>
-              <label htmlFor="lastname" className="sr-only">
-                Apellido
-              </label>
-              <input
-                id="lastname"
-                name="lastname"
-                type="text"
-                required
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Apellido"
-                value={formData.lastname}
-                onChange={handleChange}
-              />
-            </div>
+            <input
+              id="lastname"
+              name="lastname"
+              type="text"
+              required
+              placeholder="Apellido"
+              className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300"
+              value={formData.lastname}
+              onChange={handleChange}
+            />
 
-            <div>
-              <label htmlFor="phone" className="sr-only">
-                Teléfono
-              </label>
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Teléfono (opcional)"
-                value={formData.phone}
-                onChange={handleChange}
-              />
-            </div>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              placeholder="Teléfono (opcional)"
+              className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300"
+              value={formData.phone}
+              onChange={handleChange}
+            />
 
-            <div>
-              <label htmlFor="address" className="sr-only">
-                Dirección
-              </label>
-              <input
-                id="address"
-                name="address"
-                type="text"
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Dirección (opcional)"
-                value={formData.address}
-                onChange={handleChange}
-              />
-            </div>
+            <input
+              id="address"
+              name="address"
+              type="text"
+              placeholder="Dirección (opcional)"
+              className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300"
+              value={formData.address}
+              onChange={handleChange}
+            />
 
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Contraseña
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Contraseña"
-                value={formData.password}
-                onChange={handleChange}
-              />
-            </div>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              required
+              placeholder="Contraseña"
+              className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300"
+              value={formData.password}
+              onChange={handleChange}
+            />
 
-            <div>
-              <label htmlFor="confirmPassword" className="sr-only">
-                Confirmar contraseña
-              </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                required
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Confirmar contraseña"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-              />
-            </div>
+            <input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              required
+              placeholder="Confirmar contraseña"
+              className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+            />
           </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400"
-            >
-              {loading ? 'Creando cuenta...' : 'Crear cuenta'}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="group relative w-full flex justify-center py-2 px-4 rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400"
+          >
+            {loading ? 'Creando cuenta...' : 'Crear cuenta'}
+          </button>
 
           <div className="text-center">
             <p className="text-sm text-gray-600">
