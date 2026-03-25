@@ -15,19 +15,15 @@ export default function Home() {
     "/img/i1862459534.webp",
   ];
 
-  // Índices independientes
   const [indexIzquierda, setIndexIzquierda] = useState(0);
   const [indexDerecha, setIndexDerecha] = useState(0);
 
-  // Fades independientes
   const [fadeIzquierda, setFadeIzquierda] = useState(true);
   const [fadeDerecha, setFadeDerecha] = useState(true);
 
-  // Pausas independientes
   const [pausadoIzquierda, setPausadoIzquierda] = useState(false);
   const [pausadoDerecha, setPausadoDerecha] = useState(false);
 
-  // Intervalo izquierda
   useEffect(() => {
     const intervalo = setInterval(() => {
       if (!pausadoIzquierda) {
@@ -42,7 +38,6 @@ export default function Home() {
     return () => clearInterval(intervalo);
   }, [pausadoIzquierda]);
 
-  // Intervalo derecha
   useEffect(() => {
     const intervalo = setInterval(() => {
       if (!pausadoDerecha) {
@@ -82,7 +77,7 @@ export default function Home() {
         {/* Escritorio */}
         <div className="hidden md:flex w-full items-center justify-center gap-16">
 
-          {/* Imagen izquierda con fondo difuminado */}
+          {/* Imagen izquierda */}
           <div className="w-1/3 h-[520px] rounded-xl overflow-hidden relative">
             <img
               src={imagenesIzquierda[indexIzquierda]}
@@ -113,7 +108,7 @@ export default function Home() {
             />
           </div>
 
-          {/* Imagen derecha con fondo difuminado */}
+          {/* Imagen derecha */}
           <div className="w-1/3 h-[520px] rounded-xl overflow-hidden relative">
             <img
               src={imagenesDerecha[indexDerecha]}
@@ -149,8 +144,10 @@ export default function Home() {
             />
           </div>
 
-          {/* BLOQUE AUTOMÁTICO (MÓVIL) */}
-          <div className="w-full p-6 bg-white shadow rounded-lg text-center my-6">
+          {/* BLOQUE AUTOMÁTICO (MÓVIL) — DEGRADADO + SOMBRA SUAVE */}
+          <div className="w-full p-6 rounded-xl text-center 
+                          bg-gradient-to-b from-black/10 via-black/5 to-black/10
+                          shadow-lg shadow-black/20">
             <h3 className="text-xl font-semibold mb-2">Automático</h3>
             <p>Sirve la sidra con solo pulsar un botón.</p>
           </div>
@@ -203,28 +200,35 @@ export default function Home() {
 
       </section>
 
-{/* CARACTERÍSTICAS (restaurado para PC) */}
-<section className="grid md:grid-cols-3 gap-8 py-16 animate-fade-in-up">
+      {/* CARACTERÍSTICAS (PC + móvil) */}
+      <section className="grid md:grid-cols-3 gap-8 py-16 animate-fade-in-up">
 
-  {/* Automático — SOLO PC */}
-  <div className="p-6 bg-white shadow rounded-lg text-center hidden md:block">
-    <h3 className="text-xl font-semibold mb-2">Automático</h3>
-    <p>Sirve la sidra con solo pulsar un botón.</p>
-  </div>
+        {/* Automático — PC */}
+        <div className="p-6 rounded-xl text-center 
+                        bg-gradient-to-b from-black/10 via-black/5 to-black/10
+                        shadow-lg shadow-black/20">
+          <h3 className="text-xl font-semibold mb-2">Automático</h3>
+          <p>Sirve la sidra con solo pulsar un botón.</p>
+        </div>
 
-  {/* A batería */}
-  <div className="p-6 bg-white shadow rounded-lg text-center">
-    <h3 className="text-xl font-semibold mb-2">A batería</h3>
-    <p>Autonomía perfecta para reuniones y eventos.</p>
-  </div>
+        {/* A batería */}
+        <div className="p-6 rounded-xl text-center 
+                        bg-gradient-to-b from-black/10 via-black/5 to-black/10
+                        shadow-lg shadow-black/20">
+          <h3 className="text-xl font-semibold mb-2">A batería</h3>
+          <p>Autonomía perfecta para reuniones y eventos.</p>
+        </div>
 
-  {/* Diseño elegante */}
-  <div className="p-6 bg-white shadow rounded-lg text-center">
-    <h3 className="text-xl font-semibold mb-2">Diseño elegante</h3>
-    <p>Acabado moderno en acero y madera.</p>
-  </div>
+        {/* Diseño elegante */}
+        <div className="p-6 rounded-xl text-center 
+                        bg-gradient-to-b from-black/10 via-black/5 to-black/10
+                        shadow-lg shadow-black/20">
+          <h3 className="text-xl font-semibold mb-2">Diseño elegante</h3>
+          <p>Acabado moderno en acero y madera.</p>
+        </div>
 
-</section>
+      </section>
+
     </div>
   );
 }
