@@ -54,16 +54,16 @@ function buildUserResponse(profile: UserProfileRow | null, authUser: Awaited<Ret
   const phone = profile?.phone || fallbackPhone
   const address = profile?.address || fallbackAddress
   const shipping = parseShippingDetails({ address, phone, name, lastname })
+  const resolvedName = name || shipping.name || null
+  const resolvedLastname = lastname || shipping.lastname || null
 
   return {
     id: authUser?.id || '',
     email: profile?.email || authUser?.email || null,
-    name,
-    lastname,
+    name: resolvedName,
+    lastname: resolvedLastname,
     phone: shipping.phone || phone || null,
-    name: name || shipping.name || null,
-    lastname: lastname || shipping.lastname || null,
-    address: formatShippingAddress({ address, phone, name, lastname }) || null,
+    address: formatShippingAddress({ address, phone, name: resolvedName, lastname: resolvedLastname }) || null,
     shipping,
     createdat: profile?.createdat || authUser?.created_at || null,
     updatedat: profile?.updatedat || null,
