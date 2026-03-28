@@ -61,10 +61,10 @@ export default function Home() {
 
       {/* HERO */}
       <section className="text-center py-16 animate-fade-in">
-        <h2 className="text-4xl font-bold mb-4">Escanciador de Sidra Automático</h2>
+        <h1 className="text-4xl font-bold mb-4">Escanciador de Sidra Automático</h1>
         <p className="text-lg text-gray-700 mb-8 max-w-2xl mx-auto">
-          La forma más elegante, limpia y moderna de disfrutar la sidra natural.
-          Diseño minimalista, funcionamiento automático y acabado premium.
+          Compra tu escanciador de sidra automático con diseño elegante y batería recargable.
+          Servicio rápido, pago seguro y atención personalizada.
         </p>
 
         <Link
@@ -73,6 +73,14 @@ export default function Home() {
         >
           Comprar ahora
         </Link>
+      </section>
+
+      <section className="max-w-3xl mx-auto text-center mb-10 px-2">
+        <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
+          Disfruta la sidra como se merece con nuestro escanciador de sidra automático.
+          Un producto pensado para servir con comodidad, precisión y un acabado profesional,
+          ideal para casa, reuniones y hostelería.
+        </p>
       </section>
 
       {/* VIDEO + IMÁGENES */}
