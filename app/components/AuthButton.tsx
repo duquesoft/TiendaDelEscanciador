@@ -9,19 +9,24 @@ import Link from 'next/link'
 export function AuthButton() {
   const [user, setUser] = useState<User | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [authChecked, setAuthChecked] = useState(false)
   const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
     const checkAdminStatus = async (currentUser: User) => {
-      const { data: userRole } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', currentUser.id)
-        .single()
+      try {
+        const { data: userRole } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', currentUser.id)
+          .single()
 
-      setIsAdmin(userRole?.role === 'admin')
+        setIsAdmin(userRole?.role === 'admin')
+      } catch (error) {
+        console.error('Error checking admin status:', error)
+        setIsAdmin(false)
+      }
     }
 
     const checkUser = async () => {
@@ -31,10 +36,11 @@ export function AuthButton() {
         } = await supabase.auth.getSession()
         const currentUser = session?.user ?? null
         setUser(currentUser)
+        setAuthChecked(true)
 
-        // Verificar si es admin
+        // No bloquear el render por la consulta de admin.
         if (currentUser) {
-          await checkAdminStatus(currentUser)
+          void checkAdminStatus(currentUser)
         } else {
           setIsAdmin(false)
         }
@@ -42,8 +48,7 @@ export function AuthButton() {
         console.error('Error checking user:', error)
         setUser(null)
         setIsAdmin(false)
-      } finally {
-        setLoading(false)
+        setAuthChecked(true)
       }
     }
 
@@ -53,22 +58,14 @@ export function AuthButton() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      try {
-        setLoading(true)
-        const currentUser = session?.user ?? null
-        setUser(currentUser)
+      const currentUser = session?.user ?? null
+      setUser(currentUser)
+      setAuthChecked(true)
 
-        if (currentUser) {
-          await checkAdminStatus(currentUser)
-        } else {
-          setIsAdmin(false)
-        }
-      } catch (error) {
-        console.error('Error processing auth state change:', error)
-        setUser(null)
+      if (currentUser) {
+        void checkAdminStatus(currentUser)
+      } else {
         setIsAdmin(false)
-      } finally {
-        setLoading(false)
       }
     })
 
@@ -87,12 +84,21 @@ export function AuthButton() {
     }
   }
 
-  if (loading) {
+  if (!authChecked) {
     return (
-      <div className="flex gap-2" aria-busy="true" aria-live="polite">
-        <span className="px-4 py-2 bg-gray-200 text-gray-500 rounded-md animate-pulse">
-          Cargando...
-        </span>
+      <div className="flex gap-2 opacity-80" aria-busy="true" aria-live="polite">
+        <Link
+          href="/login"
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+        >
+          Iniciar sesión
+        </Link>
+        <Link
+          href="/signup"
+          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+        >
+          Registrarse
+        </Link>
       </div>
     )
   }

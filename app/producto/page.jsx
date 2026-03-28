@@ -82,7 +82,7 @@ export default async function ProductoPage() {
         name: "Cuanto tarda en cargar la bateria?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "La carga completa recomendada es de aproximadamente 3 horas con un cargador compatible.",
+          text: "La carga completa recomendada es de aproximadamente 2 horas con un cargador compatible.",
         },
       },
       {

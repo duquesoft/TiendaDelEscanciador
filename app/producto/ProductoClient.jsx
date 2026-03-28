@@ -167,7 +167,7 @@ export default function ProductoClient({ initialProducts }) {
             </div>
             <div>
               <h3 className="font-semibold text-gray-900">Cuanto tarda en cargar la bateria?</h3>
-              <p>La carga completa recomendada es de aproximadamente 3 horas con un cargador compatible.</p>
+              <p>La carga completa recomendada es de aproximadamente 2 horas con un cargador compatible.</p>
             </div>
             <div>
               <h3 className="font-semibold text-gray-900">Sirve para uso diario?</h3>
