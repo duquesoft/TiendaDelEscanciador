@@ -15,6 +15,7 @@ export default function CreateTestUserPage() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [secret, setSecret] = useState('')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -31,7 +32,7 @@ export default function CreateTestUserPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: 'Bearer dev-secret-key',
+          Authorization: `Bearer ${secret}`,
         },
         body: JSON.stringify(formData),
       })
@@ -59,6 +60,19 @@ export default function CreateTestUserPage() {
         <h1 className="text-2xl font-bold mb-6 text-gray-900">Crear Usuario de Prueba</h1>
 
         <div className="space-y-4 mb-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Token de desarrollo
+            </label>
+            <input
+              type="password"
+              name="dev-token"
+              value={secret}
+              onChange={(e) => setSecret(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500"
+            />
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Email
@@ -100,7 +114,7 @@ export default function CreateTestUserPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Apellido
+              Apellidos
             </label>
             <input
               type="text"

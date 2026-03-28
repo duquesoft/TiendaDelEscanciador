@@ -1,5 +1,7 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function Producto() {
 
@@ -61,6 +63,7 @@ export default function Producto() {
                   className={`w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg cursor-pointer border-2 transition
                     ${imagenPrincipal === img ? "border-green-600" : "border-gray-300"}
                   `}
+                  alt={`Miniatura ${index + 1} del escanciador`}
                 />
               ))}
             </div>
@@ -109,12 +112,12 @@ export default function Producto() {
             </button>
 
             {/* VER CARRITO */}
-            <a
+            <Link
               href="/carrito"
               className="inline-block mt-4 text-green-700 hover:text-green-900 font-semibold text-sm sm:text-base"
             >
               Ver carrito →
-            </a>
+            </Link>
 
           </div>
 

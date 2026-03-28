@@ -11,8 +11,17 @@ interface AdminStats {
   completedOrders: number
 }
 
+interface AdminUser {
+  id: string
+  email: string
+  name?: string
+  lastname?: string
+  phone?: string
+  createdat?: string
+}
+
 export default function AdminDashboard() {
-  const [users, setUsers] = useState<any[]>([])
+  const [users, setUsers] = useState<AdminUser[]>([])
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -90,6 +99,28 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {/* Acceso a pedidos */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Gestión</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Link
+              href="/admin/pedidos"
+              className="block p-4 border-2 border-blue-600 rounded-lg text-center hover:bg-blue-50 transition"
+            >
+              <p className="text-lg font-semibold text-blue-600">Ver todos los pedidos</p>
+              <p className="text-sm text-gray-600 mt-1">Gestiona todos los pedidos del sistema</p>
+            </Link>
+
+            <Link
+              href="/admin/reportes"
+              className="block p-4 border-2 border-green-600 rounded-lg text-center hover:bg-green-50 transition"
+            >
+              <p className="text-lg font-semibold text-green-600">Reportes y Estadísticas</p>
+              <p className="text-sm text-gray-600 mt-1">Análisis detallado del negocio</p>
+            </Link>
+          </div>
+        </div>
+
         {/* Usuarios */}
         <div className="bg-white rounded-lg shadow mb-8">
           <div className="px-6 py-4 border-b border-gray-200">
@@ -142,28 +173,6 @@ export default function AdminDashboard() {
               </tbody>
 
             </table>
-          </div>
-        </div>
-
-        {/* Acceso a pedidos */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Gestión</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Link
-              href="/admin/pedidos"
-              className="block p-4 border-2 border-blue-600 rounded-lg text-center hover:bg-blue-50 transition"
-            >
-              <p className="text-lg font-semibold text-blue-600">Ver todos los pedidos</p>
-              <p className="text-sm text-gray-600 mt-1">Gestiona todos los pedidos del sistema</p>
-            </Link>
-
-            <Link
-              href="/admin/reportes"
-              className="block p-4 border-2 border-green-600 rounded-lg text-center hover:bg-green-50 transition"
-            >
-              <p className="text-lg font-semibold text-green-600">Reportes y Estadísticas</p>
-              <p className="text-sm text-gray-600 mt-1">Análisis detallado del negocio</p>
-            </Link>
           </div>
         </div>
 

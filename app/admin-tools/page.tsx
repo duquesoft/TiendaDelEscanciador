@@ -5,8 +5,6 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 
 export default function AdminToolsPage() {
-  const [users, setUsers] = useState<any[]>([])
-  const [loadingUsers, setLoadingUsers] = useState(true)
   const [selectedUserId, setSelectedUserId] = useState<string>('')
   const [makingAdmin, setMakingAdmin] = useState(false)
   const [message, setMessage] = useState('')
@@ -21,13 +19,8 @@ export default function AdminToolsPage() {
 
         if (!currentUser) return
 
-        // Obtener lista de usuarios (desde auth.users)
-        // Nota: Esto requiere un endpoint que liste usuarios
-        setUsers([])
       } catch (error) {
         console.error('Error loading users:', error)
-      } finally {
-        setLoadingUsers(false)
       }
     }
 
@@ -120,7 +113,7 @@ export default function AdminToolsPage() {
             <li>1. Crea un usuario en /signup</li>
             <li>2. Ve a Supabase → Authentication → Users</li>
             <li>3. Copia el UUID del usuario</li>
-            <li>4. Pégalo arriba y haz clic en "Hacer Admin"</li>
+            <li>4. Pégalo arriba y haz clic en &quot;Hacer Admin&quot;</li>
             <li>5. ¡Accede a /admin!</li>
           </ol>
         </div>

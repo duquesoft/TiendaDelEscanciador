@@ -8,9 +8,15 @@ import { NextRequest, NextResponse } from 'next/server'
  */
 export async function POST(req: NextRequest) {
   try {
-    // ⚠️ Verificación de seguridad simple (reemplazar en producción)
+    if (process.env.NODE_ENV !== 'development') {
+      return NextResponse.json({ error: 'No disponible' }, { status: 404 })
+    }
+
+    // Token solo para entorno local de desarrollo
     const auth = req.headers.get('authorization')
-    if (auth !== 'Bearer dev-secret-key') {
+    const devSecret = process.env.DEV_TEST_USER_SECRET
+
+    if (!devSecret || auth !== `Bearer ${devSecret}`) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 

@@ -1,6 +1,25 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { emptyShippingDetails, serializeShippingDetails, type ShippingDetails } from '@/lib/shipping'
+
+function translateAuthError(message: string): string {
+  const normalized = message.toLowerCase()
+
+  if (normalized.includes('already been registered') || normalized.includes('already registered')) {
+    return 'Ya existe un usuario registrado con este correo electrónico'
+  }
+
+  if (normalized.includes('password should be at least')) {
+    return 'La contraseña debe tener al menos 6 caracteres'
+  }
+
+  if (normalized.includes('invalid email')) {
+    return 'El correo electrónico no es válido'
+  }
+
+  return 'No se pudo crear la cuenta. Revisa los datos e inténtalo de nuevo'
+}
 
 export async function GET() {
   try {
@@ -50,7 +69,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, name, lastname, phone, address } = await req.json()
+    const { email, password, name, lastname, phone, address, shipping } = await req.json()
 
     if (!email || !password) {
       return NextResponse.json(
@@ -59,14 +78,82 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    console.log("SERVICE ROLE KEY (primeros 15 chars):", process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 15))
+    if (typeof email !== 'string' || !email.includes('@')) {
+      return NextResponse.json(
+        { error: 'Email inválido' },
+        { status: 400 }
+      )
+    }
+
+    if (typeof password !== 'string' || password.length < 6) {
+      return NextResponse.json(
+        { error: 'Password inválido' },
+        { status: 400 }
+      )
+    }
+
+    const shippingInput = typeof shipping === 'object' && shipping !== null
+      ? (shipping as Partial<ShippingDetails>)
+      : null
+
+    const normalizedShipping: ShippingDetails = {
+      ...emptyShippingDetails(),
+      name:
+        typeof shippingInput?.name === 'string'
+          ? shippingInput.name.trim()
+          : typeof name === 'string'
+            ? name.trim()
+            : '',
+      lastname:
+        typeof shippingInput?.lastname === 'string'
+          ? shippingInput.lastname.trim()
+          : typeof lastname === 'string'
+            ? lastname.trim()
+            : '',
+      addressLine1:
+        typeof shippingInput?.addressLine1 === 'string'
+          ? shippingInput.addressLine1.trim()
+          : typeof address === 'string'
+            ? address.trim()
+            : '',
+      addressLine2: typeof shippingInput?.addressLine2 === 'string' ? shippingInput.addressLine2.trim() : '',
+      postalCode: typeof shippingInput?.postalCode === 'string' ? shippingInput.postalCode.trim() : '',
+      city: typeof shippingInput?.city === 'string' ? shippingInput.city.trim() : '',
+      province: typeof shippingInput?.province === 'string' ? shippingInput.province.trim() : '',
+      country: typeof shippingInput?.country === 'string' ? shippingInput.country.trim() : '',
+      phone:
+        typeof shippingInput?.phone === 'string'
+          ? shippingInput.phone.trim()
+          : typeof phone === 'string'
+            ? phone.trim()
+            : '',
+    }
+
+    if (
+      !normalizedShipping.name ||
+      !normalizedShipping.lastname ||
+      normalizedShipping.name.length > 100 ||
+      normalizedShipping.lastname.length > 100 ||
+      normalizedShipping.addressLine1.length > 150 ||
+      normalizedShipping.addressLine2.length > 150 ||
+      normalizedShipping.postalCode.length > 20 ||
+      normalizedShipping.city.length > 120 ||
+      normalizedShipping.province.length > 120 ||
+      normalizedShipping.country.length > 120 ||
+      normalizedShipping.phone.length > 30
+    ) {
+      return NextResponse.json(
+        { error: 'Nombre y apellidos del envío son obligatorios' },
+        { status: 400 }
+      )
+    }
+
+    const serializedAddress = serializeShippingDetails(normalizedShipping)
 
     const supabaseAdmin = createAdminClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
-
-    console.log("ADMIN CLIENT CREATED WITH KEY LENGTH:", process.env.SUPABASE_SERVICE_ROLE_KEY?.length)
 
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email,
@@ -75,39 +162,49 @@ export async function POST(req: NextRequest) {
       user_metadata: {
         name,
         lastname,
-        phone,
-        address,
+        phone: normalizedShipping.phone || null,
+        address: serializedAddress,
+        shipping: normalizedShipping,
       },
     })
 
     if (error) {
-      console.log("ERROR SUPABASE:", error)
-      return NextResponse.json({ error: error.message }, { status: 400 })
+      return NextResponse.json({ error: translateAuthError(error.message) }, { status: 400 })
     }
 
-    console.log("USER CREATED IN AUTH:", data.user.id)
-
-    // INSERT CORREGIDO
-    const insertUser = await supabaseAdmin.from("users").insert({
+    const { error: userInsertError } = await supabaseAdmin.from("users").insert({
       id: data.user.id,
       email,
       password: null,
       name,
       lastname,
-      phone,
-      address,
+      phone: normalizedShipping.phone || null,
+      address: serializedAddress,
       createdat: new Date(),
       updatedat: new Date()
     })
 
-    console.log("INSERT INTO users RESULT:", insertUser)
+    if (userInsertError) {
+      await supabaseAdmin.auth.admin.deleteUser(data.user.id)
+      return NextResponse.json(
+        { error: 'Error creando perfil de usuario' },
+        { status: 500 }
+      )
+    }
 
-    const insertRole = await supabaseAdmin.from("user_roles").insert({
+    const { error: roleInsertError } = await supabaseAdmin.from("user_roles").insert({
       user_id: data.user.id,
       role: "user"
     })
 
-    console.log("INSERT INTO user_roles RESULT:", insertRole)
+    if (roleInsertError) {
+      await supabaseAdmin.from("users").delete().eq("id", data.user.id)
+      await supabaseAdmin.auth.admin.deleteUser(data.user.id)
+      return NextResponse.json(
+        { error: 'Error asignando rol de usuario' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({ user: data.user }, { status: 201 })
 

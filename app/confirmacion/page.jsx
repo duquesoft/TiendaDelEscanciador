@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 export default function Confirmacion() {
   return (
     <div className="max-w-3xl mx-auto p-6 text-center">
@@ -8,12 +10,12 @@ export default function Confirmacion() {
         Tu pedido ha sido procesado correctamente.
       </p>
 
-      <a
+      <Link
         href="/"
         className="bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg text-lg font-semibold shadow"
       >
         Volver al inicio
-      </a>
+      </Link>
 
     </div>
   );

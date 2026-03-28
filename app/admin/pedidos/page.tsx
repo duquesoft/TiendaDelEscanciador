@@ -3,13 +3,18 @@
 import { useState, useEffect } from 'react'
 import { getAllOrders, updateOrderStatus } from '@/lib/supabase/admin'
 import Link from 'next/link'
+import { getOrderProducts } from '@/lib/order-data'
 
 interface Order {
   id: string
   user_id: string
-  product: string
-  price: number
-  quantity: number
+  productos?: Array<{
+    nombre: string
+    precio: number
+    cantidad?: number
+  }>
+  product?: string
+  quantity?: number
   status: string
   total: number
   created_at: string
@@ -20,6 +25,26 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [filter, setFilter] = useState<string>('all')
+
+  const getOrderProductSummary = (order: Order) => {
+    const products = getOrderProducts(order.productos)
+
+    if (products.length > 0) {
+      return products.map((p) => p.nombre).join(', ')
+    }
+
+    return order.product || 'Sin producto'
+  }
+
+  const getOrderQuantity = (order: Order) => {
+    const products = getOrderProducts(order.productos)
+
+    if (products.length > 0) {
+      return products.reduce((sum, p) => sum + (p.cantidad || 1), 0)
+    }
+
+    return order.quantity || 1
+  }
 
   useEffect(() => {
     const loadOrders = async () => {
@@ -77,7 +102,7 @@ export default function OrdersPage() {
         {/* Filtros */}
         <div className="bg-white rounded-lg shadow p-4 mb-6">
           <div className="flex gap-2">
-            {['all', 'pending', 'completed', 'cancelled'].map((status) => (
+            {['all', 'pending', 'paid', 'completed', 'cancelled'].map((status) => (
               <button
                 key={status}
                 onClick={() => setFilter(status)}
@@ -91,9 +116,11 @@ export default function OrdersPage() {
                   ? 'Todos'
                   : status === 'pending'
                     ? 'Pendientes'
-                    : status === 'completed'
-                      ? 'Completados'
-                      : 'Cancelados'}
+                    : status === 'paid'
+                      ? 'Pago completado'
+                      : status === 'completed'
+                        ? 'Completados'
+                        : 'Cancelados'}
               </button>
             ))}
           </div>
@@ -119,8 +146,8 @@ export default function OrdersPage() {
                   filteredOrders.map((order) => (
                     <tr key={order.id} className="border-b border-gray-200 hover:bg-gray-50">
                       <td className="px-6 py-4 text-sm text-gray-900">{order.id.slice(0, 8)}...</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">{order.product}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">{order.quantity}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900">{getOrderProductSummary(order)}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900">{getOrderQuantity(order)}</td>
                       <td className="px-6 py-4 text-sm text-gray-900 font-semibold">€{order.total.toFixed(2)}</td>
                       <td className="px-6 py-4 text-sm">
                         <select
@@ -129,12 +156,15 @@ export default function OrdersPage() {
                           className={`px-3 py-1 rounded-full text-sm font-medium border-0 cursor-pointer ${
                             order.status === 'pending'
                               ? 'bg-yellow-100 text-yellow-800'
-                              : order.status === 'completed'
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-red-100 text-red-800'
+                              : order.status === 'paid'
+                                ? 'bg-blue-100 text-blue-800'
+                                : order.status === 'completed'
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-red-100 text-red-800'
                           }`}
                         >
                           <option value="pending">Pendiente</option>
+                          <option value="paid">Pago completado</option>
                           <option value="completed">Completado</option>
                           <option value="cancelled">Cancelado</option>
                         </select>

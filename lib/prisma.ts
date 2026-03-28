@@ -6,4 +6,6 @@
 // o
 // import { createClient } from '@/lib/supabase/client'
 
-export default null
+const prismaCompatStub = null
+
+export default prismaCompatStub

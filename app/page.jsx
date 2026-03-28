@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import { useEffect, useState } from "react";
 // trigger redeploy
@@ -23,34 +24,36 @@ export default function Home() {
 
   const [pausadoIzquierda, setPausadoIzquierda] = useState(false);
   const [pausadoDerecha, setPausadoDerecha] = useState(false);
+  const totalImagenesIzquierda = imagenesIzquierda.length;
+  const totalImagenesDerecha = imagenesDerecha.length;
 
   useEffect(() => {
     const intervalo = setInterval(() => {
       if (!pausadoIzquierda) {
         setFadeIzquierda(false);
         setTimeout(() => {
-          setIndexIzquierda((prev) => (prev + 1) % imagenesIzquierda.length);
+          setIndexIzquierda((prev) => (prev + 1) % totalImagenesIzquierda);
           setFadeIzquierda(true);
         }, 300);
       }
     }, 3000);
 
     return () => clearInterval(intervalo);
-  }, [pausadoIzquierda]);
+  }, [pausadoIzquierda, totalImagenesIzquierda]);
 
   useEffect(() => {
     const intervalo = setInterval(() => {
       if (!pausadoDerecha) {
         setFadeDerecha(false);
         setTimeout(() => {
-          setIndexDerecha((prev) => (prev + 1) % imagenesDerecha.length);
+          setIndexDerecha((prev) => (prev + 1) % totalImagenesDerecha);
           setFadeDerecha(true);
         }, 300);
       }
     }, 3000);
 
     return () => clearInterval(intervalo);
-  }, [pausadoDerecha]);
+  }, [pausadoDerecha, totalImagenesDerecha]);
 
   return (
     <div className="max-w-6xl mx-auto px-6">
@@ -82,6 +85,7 @@ export default function Home() {
             <img
               src={imagenesIzquierda[indexIzquierda]}
               className="absolute inset-0 w-full h-full object-cover scale-125 blur-lg opacity-70"
+              alt="Fondo desenfocado del producto"
             />
 
             <img
@@ -93,6 +97,7 @@ export default function Home() {
               className={`absolute inset-0 w-full h-full object-contain rounded-xl transition-opacity duration-700 ${
                 fadeIzquierda ? "opacity-100" : "opacity-0"
               }`}
+              alt="Imagen del escanciador"
             />
           </div>
 
@@ -113,6 +118,7 @@ export default function Home() {
             <img
               src={imagenesDerecha[indexDerecha]}
               className="absolute inset-0 w-full h-full object-cover scale-125 blur-lg opacity-70"
+              alt="Fondo desenfocado del producto"
             />
 
             <img
@@ -124,6 +130,7 @@ export default function Home() {
               className={`absolute inset-0 w-full h-full object-contain rounded-xl transition-opacity duration-700 ${
                 fadeDerecha ? "opacity-100" : "opacity-0"
               }`}
+              alt="Imagen del escanciador"
             />
           </div>
 
@@ -160,6 +167,7 @@ export default function Home() {
               <img
                 src={imagenesIzquierda[indexIzquierda]}
                 className="absolute inset-0 w-full h-full object-cover scale-125 blur-lg opacity-70"
+                alt="Fondo desenfocado del producto"
               />
 
               <img
@@ -171,6 +179,7 @@ export default function Home() {
                 className={`absolute inset-0 w-full h-full object-contain rounded-xl transition-opacity duration-700 ${
                   fadeIzquierda ? "opacity-100" : "opacity-0"
                 }`}
+                alt="Imagen del escanciador"
               />
             </div>
 
@@ -180,6 +189,7 @@ export default function Home() {
               <img
                 src={imagenesDerecha[indexDerecha]}
                 className="absolute inset-0 w-full h-full object-cover scale-125 blur-lg opacity-70"
+                alt="Fondo desenfocado del producto"
               />
 
               <img
@@ -191,6 +201,7 @@ export default function Home() {
                 className={`absolute inset-0 w-full h-full object-contain rounded-xl transition-opacity duration-700 ${
                   fadeDerecha ? "opacity-100" : "opacity-0"
                 }`}
+                alt="Imagen del escanciador"
               />
             </div>
 

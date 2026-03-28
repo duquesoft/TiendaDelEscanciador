@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
@@ -11,9 +11,19 @@ export function AuthButton() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
+    const checkAdminStatus = async (currentUser: User) => {
+      const { data: userRole } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', currentUser.id)
+        .single()
+
+      setIsAdmin(userRole?.role === 'admin')
+    }
+
     const checkUser = async () => {
       try {
         const {
@@ -23,13 +33,9 @@ export function AuthButton() {
 
         // Verificar si es admin
         if (user) {
-          const { data: userRole } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', user.id)
-            .single()
-
-          setIsAdmin(userRole?.role === 'admin')
+          await checkAdminStatus(user)
+        } else {
+          setIsAdmin(false)
         }
       } catch (error) {
         console.error('Error checking user:', error)
@@ -43,8 +49,15 @@ export function AuthButton() {
     // Escuchar cambios en autenticación
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const currentUser = session?.user ?? null
+      setUser(currentUser)
+
+      if (currentUser) {
+        await checkAdminStatus(currentUser)
+      } else {
+        setIsAdmin(false)
+      }
     })
 
     return () => subscription.unsubscribe()
@@ -70,6 +83,12 @@ export function AuthButton() {
     return (
       <div className="flex items-center gap-3">
         <span className="text-sm text-gray-700">{user.email}</span>
+        <Link
+          href="/mi-cuenta"
+          className="px-3 py-2 bg-slate-700 text-white text-sm rounded-md hover:bg-slate-800 transition"
+        >
+          Mi cuenta
+        </Link>
         {isAdmin && (
           <Link
             href="/admin"

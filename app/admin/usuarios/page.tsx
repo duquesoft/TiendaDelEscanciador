@@ -3,24 +3,62 @@
 import { useState, useEffect } from 'react'
 import { getOrdersByUser, getAllUsers } from '@/lib/supabase/admin'
 import Link from 'next/link'
+import { getOrderProducts } from '@/lib/order-data'
+import type { ShippingDetails } from '@/lib/shipping'
 
 interface Order {
   id: string
   user_id: string
-  product: string
-  price: number
-  quantity: number
+  productos?: Array<{
+    nombre: string
+    precio: number
+    cantidad?: number
+  }>
+  product?: string
+  quantity?: number
   status: string
   total: number
   created_at: string
 }
 
+interface AdminUser {
+  id: string
+  email: string
+  name?: string
+  lastname?: string
+  phone?: string
+  address?: string
+  shipping?: ShippingDetails
+  createdat?: string
+  role?: string
+}
+
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<any[]>([])
+  const [users, setUsers] = useState<AdminUser[]>([])
   const [selectedUser, setSelectedUser] = useState<string | null>(null)
   const [userOrders, setUserOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [ordersLoading, setOrdersLoading] = useState(false)
+
+  const getOrderProductSummary = (order: Order) => {
+    const products = getOrderProducts(order.productos)
+
+    if (products.length > 0) {
+      return products.map((p) => p.nombre).join(', ')
+    }
+
+    return order.product || 'Sin producto'
+  }
+
+  const getOrderQuantity = (order: Order) => {
+    const products = getOrderProducts(order.productos)
+
+    if (products.length > 0) {
+      return products.reduce((sum, p) => sum + (p.cantidad || 1), 0)
+    }
+
+    return order.quantity || 1
+  }
 
   useEffect(() => {
     const loadUsers = async () => {
@@ -119,15 +157,37 @@ export default function AdminUsersPage() {
                     <h3 className="text-lg font-bold text-gray-900 mb-4">Detalles del Usuario</h3>
                     {(() => {
                       const user = users.find((u) => u.id === selectedUser)
+
+                      if (!user) {
+                        return null
+                      }
+
                       return (
                         <div className="space-y-2 text-gray-600">
-                          <p><span className="font-medium">Email:</span> {user?.email}</p>
-                          <p><span className="font-medium">Nombre:</span> {user?.name}</p>
-                          <p><span className="font-medium">Apellido:</span> {user?.lastname}</p>
-                          <p><span className="font-medium">Teléfono:</span> {user?.phone || 'No disponible'}</p>
-                          <p><span className="font-medium">Dirección:</span> {user?.address || 'No disponible'}</p>
-                          <p><span className="font-medium">Fecha registro:</span> {new Date(user?.createdat).toLocaleString()}</p>
-                          <p><span className="font-medium">Rol:</span> {user?.user_roles?.role || 'user'}</p>
+                          <p><span className="font-medium">Email:</span> {user.email}</p>
+                          <p><span className="font-medium">Nombre:</span> {user.name}</p>
+                          <p><span className="font-medium">Apellidos:</span> {user.lastname}</p>
+                          <p><span className="font-medium">Teléfono:</span> {user.phone || 'No disponible'}</p>
+                          <div className="pt-2">
+                            <p className="font-medium text-gray-800">Datos de envío:</p>
+                            {user.shipping ? (
+                              <div className="mt-1 space-y-1 text-sm">
+                                <p><span className="font-medium">Nombre:</span> {user.shipping.name || 'No disponible'}</p>
+                                <p><span className="font-medium">Apellidos:</span> {user.shipping.lastname || 'No disponible'}</p>
+                                <p><span className="font-medium">Dirección L1:</span> {user.shipping.addressLine1 || 'No disponible'}</p>
+                                <p><span className="font-medium">Dirección L2:</span> {user.shipping.addressLine2 || 'No disponible'}</p>
+                                <p><span className="font-medium">CP:</span> {user.shipping.postalCode || 'No disponible'}</p>
+                                <p><span className="font-medium">Ciudad:</span> {user.shipping.city || 'No disponible'}</p>
+                                <p><span className="font-medium">Provincia:</span> {user.shipping.province || 'No disponible'}</p>
+                                <p><span className="font-medium">País:</span> {user.shipping.country || 'No disponible'}</p>
+                                <p><span className="font-medium">Teléfono contacto:</span> {user.shipping.phone || 'No disponible'}</p>
+                              </div>
+                            ) : (
+                              <p className="text-sm">{user.address || 'No disponible'}</p>
+                            )}
+                          </div>
+                          <p><span className="font-medium">Fecha registro:</span> {user.createdat ? new Date(user.createdat).toLocaleString() : 'No disponible'}</p>
+                          <p><span className="font-medium">Rol:</span> {user.role || 'user'}</p>
 
                           <div className="flex gap-3 mt-4">
                             <Link
@@ -171,14 +231,16 @@ export default function AdminUsersPage() {
                         <tbody>
                           {userOrders.map((order) => (
                             <tr key={order.id} className="border-b border-gray-200">
-                              <td className="px-4 py-2">{order.product}</td>
-                              <td className="px-4 py-2">{order.quantity}</td>
+                              <td className="px-4 py-2">{getOrderProductSummary(order)}</td>
+                              <td className="px-4 py-2">{getOrderQuantity(order)}</td>
                               <td className="px-4 py-2">€{order.total.toFixed(2)}</td>
                               <td className="px-4 py-2">
                                 <span
                                   className={`px-2 py-1 rounded-full text-xs font-medium ${
                                     order.status === 'pending'
                                       ? 'bg-yellow-100 text-yellow-800'
+                                      : order.status === 'paid'
+                                      ? 'bg-blue-100 text-blue-800'
                                       : order.status === 'completed'
                                       ? 'bg-green-100 text-green-800'
                                       : 'bg-red-100 text-red-800'
@@ -186,6 +248,8 @@ export default function AdminUsersPage() {
                                 >
                                   {order.status === 'pending'
                                     ? 'Pendiente'
+                                    : order.status === 'paid'
+                                    ? 'Pago completado'
                                     : order.status === 'completed'
                                     ? 'Completado'
                                     : 'Cancelado'}

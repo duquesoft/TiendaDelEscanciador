@@ -1,7 +1,16 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
+import { formatShippingAddress, parseShippingDetails } from '@/lib/shipping'
+
+function createAdminClient() {
+  return createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
 
 export async function checkAdminAccess() {
   const supabase = await createClient()
@@ -58,7 +67,7 @@ export async function getAllUsers() {
       String(user.id).trim().toLowerCase()
     )?.role || "user"
 
-    return { ...user, role }
+    return { ...user, address: formatShippingAddress(user), shipping: parseShippingDetails(user), role }
   })
 
   return usersWithRoles
@@ -72,7 +81,7 @@ export async function getAllOrders() {
 
   const { data, error } = await supabase
     .from('orders')
-    .select('*, user_roles!inner(user_id)')
+    .select('*')
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -81,6 +90,25 @@ export async function getAllOrders() {
   }
 
   return data || []
+}
+
+export async function getOrderById(orderId: string) {
+  const supabase = await createClient()
+
+  await checkAdminAccess()
+
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('id', orderId)
+    .single()
+
+  if (error) {
+    console.error('Error fetching order:', error)
+    return null
+  }
+
+  return data
 }
 
 export async function getOrdersByUser(userId: string) {
@@ -104,14 +132,15 @@ export async function getOrdersByUser(userId: string) {
 }
 
 export async function updateOrderStatus(orderId: string, status: string) {
-  const supabase = await createClient()
-
-  // Verificar acceso admin
+  // Verificar acceso admin con el cliente de sesión
   await checkAdminAccess()
+
+  // Usar service role para bypassear RLS en el UPDATE
+  const supabase = createAdminClient()
 
   const { error } = await supabase
     .from('orders')
-    .update({ status, updated_at: new Date().toISOString() })
+    .update({ status })
     .eq('id', orderId)
 
   if (error) {
