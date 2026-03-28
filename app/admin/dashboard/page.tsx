@@ -47,6 +47,7 @@ export default function AdminDashboard() {
     loadData()
   }, [])
 
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">

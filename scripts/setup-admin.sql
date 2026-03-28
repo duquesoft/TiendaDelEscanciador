@@ -55,4 +55,28 @@ CREATE POLICY "Users can view their own orders"
   ON public.orders FOR SELECT
   USING (auth.uid() = user_id OR is_admin(auth.uid()));
 
+-- Configuración global de tienda
+CREATE TABLE IF NOT EXISTS public.store_settings (
+  key TEXT PRIMARY KEY,
+  value NUMERIC NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE public.store_settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Admins can read store settings" ON public.store_settings;
+CREATE POLICY "Admins can read store settings"
+  ON public.store_settings FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1
+      FROM public.user_roles ur
+      WHERE ur.user_id = auth.uid() AND ur.role = 'admin'
+    )
+  );
+
+INSERT INTO public.store_settings (key, value)
+VALUES ('shipping_fee', 0)
+ON CONFLICT (key) DO NOTHING;
+
 

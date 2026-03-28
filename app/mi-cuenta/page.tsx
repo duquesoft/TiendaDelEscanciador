@@ -161,6 +161,13 @@ export default function AccountPage() {
   }
 
   const fullName = `${user.name || ''} ${user.lastname || ''}`.trim()
+  const joinShippingParts = (parts: Array<string | null | undefined>) => {
+    const cleanedParts = parts
+      .map((part) => (part || '').trim())
+      .filter(Boolean)
+
+    return cleanedParts.length > 0 ? cleanedParts.join(', ') : 'No disponible'
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -381,48 +388,19 @@ export default function AccountPage() {
               </form>
             ) : (
               <div className="space-y-3 text-sm text-gray-700">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-gray-500">Nombre</p>
-                    <p className="font-medium text-gray-900">{user.shipping.name || 'No disponible'}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Apellidos</p>
-                    <p className="font-medium text-gray-900">{user.shipping.lastname || 'No disponible'}</p>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-gray-500">Direccion (Linea 1)</p>
-                  <p className="font-medium text-gray-900">{user.shipping.addressLine1 || 'No disponible'}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Direccion (Linea 2)</p>
-                  <p className="font-medium text-gray-900">{user.shipping.addressLine2 || 'No disponible'}</p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-gray-500">Localidad / Ciudad</p>
-                    <p className="font-medium text-gray-900">{user.shipping.city || 'No disponible'}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Provincia</p>
-                    <p className="font-medium text-gray-900">{user.shipping.province || 'No disponible'}</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-gray-500">Codigo postal</p>
-                    <p className="font-medium text-gray-900">{user.shipping.postalCode || 'No disponible'}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Pais</p>
-                    <p className="font-medium text-gray-900">{user.shipping.country || 'No disponible'}</p>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-gray-500">Telefono de contacto</p>
-                  <p className="font-medium text-gray-900">{user.shipping.phone || 'No disponible'}</p>
-                </div>
+                <p className="font-medium text-gray-900">
+                  {joinShippingParts([user.shipping.name, user.shipping.lastname])}
+                </p>
+                <p className="font-medium text-gray-900">
+                  {joinShippingParts([user.shipping.addressLine1, user.shipping.addressLine2])}
+                </p>
+                <p className="font-medium text-gray-900">
+                  {joinShippingParts([user.shipping.city, user.shipping.province])}
+                </p>
+                <p className="font-medium text-gray-900">
+                  {joinShippingParts([user.shipping.postalCode, user.shipping.country])}
+                </p>
+                <p className="font-medium text-gray-900">{user.shipping.phone?.trim() || 'No disponible'}</p>
                 {saveMessage && (
                   <p className="text-sm text-green-700">{saveMessage}</p>
                 )}

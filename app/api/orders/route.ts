@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { attachShippingToProducts } from '@/lib/order-data'
 import { emptyShippingDetails, parseShippingDetails, type ShippingDetails } from '@/lib/shipping'
+import { DEFAULT_SHIPPING_FEE, parseShippingFeeRecord } from '@/lib/shipping-fee'
 
 interface OrderProduct {
   id?: number | string
@@ -10,6 +11,26 @@ interface OrderProduct {
   precio: number
   cantidad?: number
   imagen?: string
+}
+
+async function getShippingFee() {
+  const supabaseAdmin = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  const { data, error } = await supabaseAdmin
+    .from('store_settings')
+    .select('value')
+    .eq('key', 'shipping_fee')
+    .maybeSingle()
+
+  if (error) {
+    console.error('Error reading shipping fee setting:', error)
+    return DEFAULT_SHIPPING_FEE
+  }
+
+  return parseShippingFeeRecord(data)
 }
 
 /**
@@ -81,12 +102,15 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const total = normalizedProducts.reduce((acc, item) => acc + item.precio * (item.cantidad || 1), 0)
+    const productsTotal = normalizedProducts.reduce((acc, item) => acc + item.precio * (item.cantidad || 1), 0)
 
     const supabaseAdmin = createAdminClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
+
+    const shippingFee = await getShippingFee()
+    const total = Math.round((productsTotal + shippingFee) * 100) / 100
 
     const shippingInput = typeof shipping === 'object' && shipping !== null
       ? (shipping as Partial<ShippingDetails>)

@@ -60,6 +60,14 @@ export default function AdminUsersPage() {
     return order.quantity || 1
   }
 
+  const formatShippingLine = (parts: Array<string | undefined>) => {
+    const values = parts
+      .map((part) => (part || '').trim())
+      .filter(Boolean)
+
+    return values.length > 0 ? values.join(', ') : 'No disponible'
+  }
+
   useEffect(() => {
     const loadUsers = async () => {
       try {
@@ -172,15 +180,19 @@ export default function AdminUsersPage() {
                             <p className="font-medium text-gray-800">Datos de envío:</p>
                             {user.shipping ? (
                               <div className="mt-1 space-y-1 text-sm">
-                                <p><span className="font-medium">Nombre:</span> {user.shipping.name || 'No disponible'}</p>
-                                <p><span className="font-medium">Apellidos:</span> {user.shipping.lastname || 'No disponible'}</p>
-                                <p><span className="font-medium">Dirección L1:</span> {user.shipping.addressLine1 || 'No disponible'}</p>
-                                <p><span className="font-medium">Dirección L2:</span> {user.shipping.addressLine2 || 'No disponible'}</p>
-                                <p><span className="font-medium">CP:</span> {user.shipping.postalCode || 'No disponible'}</p>
-                                <p><span className="font-medium">Ciudad:</span> {user.shipping.city || 'No disponible'}</p>
-                                <p><span className="font-medium">Provincia:</span> {user.shipping.province || 'No disponible'}</p>
-                                <p><span className="font-medium">País:</span> {user.shipping.country || 'No disponible'}</p>
-                                <p><span className="font-medium">Teléfono contacto:</span> {user.shipping.phone || 'No disponible'}</p>
+                                <p className="font-medium text-gray-900">
+                                  {formatShippingLine([user.shipping.name, user.shipping.lastname])}
+                                </p>
+                                <p className="font-medium text-gray-900">
+                                  {formatShippingLine([user.shipping.addressLine1, user.shipping.addressLine2])}
+                                </p>
+                                <p className="font-medium text-gray-900">
+                                  {formatShippingLine([user.shipping.city, user.shipping.province])}
+                                </p>
+                                <p className="font-medium text-gray-900">
+                                  {formatShippingLine([user.shipping.postalCode, user.shipping.country])}
+                                </p>
+                                <p className="font-medium text-gray-900">{user.shipping.phone?.trim() || 'No disponible'}</p>
                               </div>
                             ) : (
                               <p className="text-sm">{user.address || 'No disponible'}</p>

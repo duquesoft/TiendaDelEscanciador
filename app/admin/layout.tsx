@@ -97,6 +97,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             >
               Reportes
             </Link>
+            <Link
+              href="/admin/configuracion"
+              className="block px-4 py-2 rounded-lg hover:bg-gray-800 transition"
+            >
+              Configuración
+            </Link>
             <hr className="my-4 border-gray-700" />
             <Link
               href="/"

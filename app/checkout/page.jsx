@@ -12,6 +12,7 @@ export default function Checkout() {
   const [carrito, setCarrito] = useState([])
   const [shipping, setShipping] = useState(emptyShippingDetails())
   const [shippingLoaded, setShippingLoaded] = useState(false)
+  const [shippingFee, setShippingFee] = useState(0)
 
   useEffect(() => {
     const datos = JSON.parse(localStorage.getItem("carrito")) || []
@@ -40,9 +41,25 @@ export default function Checkout() {
     }
 
     loadShipping()
+
+    const loadShippingFee = async () => {
+      try {
+        const response = await fetch('/api/settings/shipping-fee')
+        const data = await response.json()
+
+        if (response.ok && Number.isFinite(Number(data?.shippingFee))) {
+          setShippingFee(Number(data.shippingFee))
+        }
+      } catch (err) {
+        console.error('No se pudo cargar gastos de envío:', err)
+      }
+    }
+
+    loadShippingFee()
   }, [])
 
-  const total = carrito.reduce((acc, p) => acc + p.precio, 0)
+  const subtotal = carrito.reduce((acc, p) => acc + p.precio, 0)
+  const total = subtotal + shippingFee
 
   const hasShippingMinimum = Boolean(
     shipping.name &&
@@ -71,7 +88,7 @@ export default function Checkout() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productos: carrito,
-          total: total,
+          total: subtotal,
           shipping,
         }),
       })
@@ -121,6 +138,14 @@ export default function Checkout() {
 
           {/* TOTAL */}
           <div className="mb-6 border-t border-b border-gray-300 py-4">
+            <div className="flex justify-between text-base text-gray-700 mb-2">
+              <span>Subtotal:</span>
+              <span>€{subtotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-base text-gray-700 mb-2">
+              <span>Gastos de envío:</span>
+              <span>€{shippingFee.toFixed(2)}</span>
+            </div>
             <div className="flex justify-between text-lg font-semibold">
               <span>Total:</span>
               <span>€{total.toFixed(2)}</span>
@@ -140,11 +165,9 @@ export default function Checkout() {
             ) : hasShippingMinimum ? (
               <div className="text-sm text-gray-700 space-y-1">
                 <p className="font-medium text-gray-900">{shipping.name} {shipping.lastname}</p>
-                <p>{shipping.addressLine1}</p>
-                {shipping.addressLine2 && <p>{shipping.addressLine2}</p>}
-                <p>{shipping.postalCode} {shipping.city}</p>
-                <p>{shipping.province}</p>
-                <p>{shipping.country}</p>
+                <p>{shipping.addressLine1}{shipping.addressLine2 ? `, ${shipping.addressLine2}` : ''}</p>
+                <p>{shipping.city}, {shipping.province}</p>
+                <p>{shipping.postalCode}, {shipping.country}</p>
                 <p>{shipping.phone}</p>
               </div>
             ) : (

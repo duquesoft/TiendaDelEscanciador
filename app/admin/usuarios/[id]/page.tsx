@@ -98,6 +98,14 @@ export default function UserDetailPage() {
     return order.quantity || 1
   }
 
+  const formatShippingLine = (parts: Array<string | undefined>) => {
+    const values = parts
+      .map((part) => (part || '').trim())
+      .filter(Boolean)
+
+    return values.length > 0 ? values.join(', ') : 'No disponible'
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -167,14 +175,11 @@ export default function UserDetailPage() {
                 <dt className="font-medium text-gray-500">Datos de envío</dt>
                 {user.shipping ? (
                   <dd className="text-gray-900 mt-0.5 space-y-1">
-                    <div>{user.shipping.name || 'No disponible'}</div>
-                    <div>{user.shipping.lastname || 'No disponible'}</div>
-                    <div>{user.shipping.addressLine1 || 'No disponible'}</div>
-                    {user.shipping.addressLine2 && <div>{user.shipping.addressLine2}</div>}
-                    <div>{[user.shipping.postalCode, user.shipping.city].filter(Boolean).join(' ') || 'No disponible'}</div>
-                    <div>{user.shipping.province || 'No disponible'}</div>
-                    <div>{user.shipping.country || 'No disponible'}</div>
-                    <div>{user.shipping.phone || 'No disponible'}</div>
+                    <div>{formatShippingLine([user.shipping.name, user.shipping.lastname])}</div>
+                    <div>{formatShippingLine([user.shipping.addressLine1, user.shipping.addressLine2])}</div>
+                    <div>{formatShippingLine([user.shipping.city, user.shipping.province])}</div>
+                    <div>{formatShippingLine([user.shipping.postalCode, user.shipping.country])}</div>
+                    <div>{user.shipping.phone?.trim() || 'No disponible'}</div>
                   </dd>
                 ) : (
                   <dd className="text-gray-900 mt-0.5">{user.address || 'No disponible'}</dd>

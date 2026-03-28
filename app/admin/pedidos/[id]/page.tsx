@@ -93,6 +93,14 @@ export default function OrderDetailPage() {
       : []
   const shipping = getOrderShipping(order.productos)
 
+  const formatShippingLine = (parts: Array<string | undefined>) => {
+    const values = parts
+      .map((part) => (part || '').trim())
+      .filter(Boolean)
+
+    return values.length > 0 ? values.join(', ') : 'No disponible'
+  }
+
   const statusLabel: Record<string, string> = {
     pending: 'Pendiente',
     paid: 'Pago completado',
@@ -179,44 +187,13 @@ export default function OrderDetailPage() {
             {shipping && (
               <div className="bg-white rounded-lg shadow p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Envío congelado del pedido</h2>
-                <dl className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <dt className="font-medium text-gray-500">Nombre</dt>
-                    <dd className="text-gray-900 mt-0.5">{shipping.name || 'No disponible'}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-gray-500">Apellidos</dt>
-                    <dd className="text-gray-900 mt-0.5">{shipping.lastname || 'No disponible'}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-gray-500">Teléfono</dt>
-                    <dd className="text-gray-900 mt-0.5">{shipping.phone || 'No disponible'}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-gray-500">Dirección L1</dt>
-                    <dd className="text-gray-900 mt-0.5">{shipping.addressLine1 || 'No disponible'}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-gray-500">Dirección L2</dt>
-                    <dd className="text-gray-900 mt-0.5">{shipping.addressLine2 || 'No disponible'}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-gray-500">Código postal</dt>
-                    <dd className="text-gray-900 mt-0.5">{shipping.postalCode || 'No disponible'}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-gray-500">Ciudad</dt>
-                    <dd className="text-gray-900 mt-0.5">{shipping.city || 'No disponible'}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-gray-500">Provincia</dt>
-                    <dd className="text-gray-900 mt-0.5">{shipping.province || 'No disponible'}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-gray-500">País</dt>
-                    <dd className="text-gray-900 mt-0.5">{shipping.country || 'No disponible'}</dd>
-                  </div>
-                </dl>
+                <div className="text-sm text-gray-900 space-y-1">
+                  <p className="font-medium">{formatShippingLine([shipping.name, shipping.lastname])}</p>
+                  <p className="font-medium">{formatShippingLine([shipping.addressLine1, shipping.addressLine2])}</p>
+                  <p className="font-medium">{formatShippingLine([shipping.city, shipping.province])}</p>
+                  <p className="font-medium">{formatShippingLine([shipping.postalCode, shipping.country])}</p>
+                  <p className="font-medium">{shipping.phone?.trim() || 'No disponible'}</p>
+                </div>
               </div>
             )}
           </div>
