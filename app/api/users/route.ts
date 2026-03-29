@@ -93,6 +93,7 @@ export async function POST(req: NextRequest) {
           : typeof lastname === 'string'
             ? lastname.trim()
             : '',
+      nif: typeof shippingInput?.nif === 'string' ? shippingInput.nif.trim() : '',
       addressLine1:
         typeof shippingInput?.addressLine1 === 'string'
           ? shippingInput.addressLine1.trim()
@@ -119,6 +120,7 @@ export async function POST(req: NextRequest) {
       normalizedShipping.lastname.length > 100 ||
       normalizedShipping.addressLine1.length > 150 ||
       normalizedShipping.addressLine2.length > 150 ||
+      normalizedShipping.nif.length > 20 ||
       normalizedShipping.postalCode.length > 20 ||
       normalizedShipping.city.length > 120 ||
       normalizedShipping.province.length > 120 ||

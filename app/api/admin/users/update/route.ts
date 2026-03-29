@@ -54,6 +54,7 @@ export async function POST(req: Request) {
           : typeof lastname === 'string'
             ? lastname.trim()
             : '',
+      nif: typeof shippingInput?.nif === 'string' ? shippingInput.nif.trim() : '',
       addressLine1:
         typeof shippingInput?.addressLine1 === 'string'
           ? shippingInput.addressLine1.trim()

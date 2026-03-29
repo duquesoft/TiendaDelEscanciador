@@ -104,7 +104,20 @@ export default function OrderDetailPage() {
       ? [{ nombre: order.product, precio: order.total, cantidad: order.quantity || 1 }]
       : []
   const embeddedShipping = getOrderShipping(order.productos)
-  const shipping = embeddedShipping ?? userShipping
+  const shipping = embeddedShipping || userShipping
+    ? {
+        name: embeddedShipping?.name?.trim() || userShipping?.name?.trim() || '',
+        lastname: embeddedShipping?.lastname?.trim() || userShipping?.lastname?.trim() || '',
+        nif: embeddedShipping?.nif?.trim() || userShipping?.nif?.trim() || '',
+        addressLine1: embeddedShipping?.addressLine1?.trim() || userShipping?.addressLine1?.trim() || '',
+        addressLine2: embeddedShipping?.addressLine2?.trim() || userShipping?.addressLine2?.trim() || '',
+        postalCode: embeddedShipping?.postalCode?.trim() || userShipping?.postalCode?.trim() || '',
+        city: embeddedShipping?.city?.trim() || userShipping?.city?.trim() || '',
+        province: embeddedShipping?.province?.trim() || userShipping?.province?.trim() || '',
+        country: embeddedShipping?.country?.trim() || userShipping?.country?.trim() || '',
+        phone: embeddedShipping?.phone?.trim() || userShipping?.phone?.trim() || '',
+      }
+    : null
   const shippingIsFromProfile = !embeddedShipping && !!userShipping
 
   const formatShippingLine = (parts: Array<string | undefined>) => {
@@ -203,7 +216,8 @@ export default function OrderDetailPage() {
                   <p>{formatShippingLine([shipping.addressLine1, shipping.addressLine2])}</p>
                   <p>{formatShippingLine([shipping.city, shipping.province])}</p>
                   <p>{formatShippingLine([shipping.postalCode, shipping.country])}</p>
-                  <p>{shipping.phone?.trim() || 'Sin teléfono'}</p>
+                  <p>N.I.F.: {shipping.nif?.trim() || 'No disponible'}</p>
+                  <p>Tel.: {shipping.phone?.trim() || 'Sin teléfono'}</p>
                 </div>
               </div>
             ) : (

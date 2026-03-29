@@ -1,6 +1,7 @@
 export interface ShippingDetails {
   name: string
   lastname: string
+  nif: string
   addressLine1: string
   addressLine2: string
   postalCode: string
@@ -20,6 +21,7 @@ export function emptyShippingDetails(): ShippingDetails {
   return {
     name: '',
     lastname: '',
+    nif: '',
     addressLine1: '',
     addressLine2: '',
     postalCode: '',
@@ -51,6 +53,7 @@ export function parseShippingDetails(input: {
       return {
         name: parsedName || fallbackParts[0] || input.name || '',
         lastname: parsedLastname || fallbackParts.slice(1).join(' ') || input.lastname || '',
+        nif: asString(parsed.nif),
         addressLine1: asString(parsed.addressLine1),
         addressLine2: asString(parsed.addressLine2),
         postalCode: asString(parsed.postalCode),
@@ -83,6 +86,7 @@ export function serializeShippingDetails(details: ShippingDetails): string | nul
   const normalized: ShippingDetails = {
     name: asString(details.name),
     lastname: asString(details.lastname),
+    nif: asString(details.nif),
     addressLine1: asString(details.addressLine1),
     addressLine2: asString(details.addressLine2),
     postalCode: asString(details.postalCode),
@@ -115,11 +119,13 @@ export function formatShippingAddress(input: {
   const locality = [details.postalCode, details.city].filter(Boolean).join(' ')
 
   return [
+    details.nif ? `N.I.F.: ${details.nif}` : '',
     details.addressLine1,
     details.addressLine2,
     locality,
     details.province,
     details.country,
+    details.phone ? `Tel.: ${details.phone}` : '',
   ]
     .filter(Boolean)
     .join(', ')

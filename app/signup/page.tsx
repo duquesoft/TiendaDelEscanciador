@@ -203,15 +203,25 @@ export default function SignupPage() {
               />
 
               <input
-                id="phone"
-                name="phone"
-                type="tel"
-                placeholder="Teléfono de contacto"
+                id="nif"
+                name="nif"
+                type="text"
+                placeholder="N.I.F."
                 className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300"
-                value={formData.shipping.phone}
+                value={formData.shipping.nif}
                 onChange={handleShippingChange}
               />
             </div>
+
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              placeholder="Teléfono de contacto"
+              className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300"
+              value={formData.shipping.phone}
+              onChange={handleShippingChange}
+            />
 
             <input
               id="password"

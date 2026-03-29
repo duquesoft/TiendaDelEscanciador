@@ -168,7 +168,8 @@ export default function Checkout() {
                 <p>{shipping.addressLine1}{shipping.addressLine2 ? `, ${shipping.addressLine2}` : ''}</p>
                 <p>{shipping.city}, {shipping.province}</p>
                 <p>{shipping.postalCode}, {shipping.country}</p>
-                <p>{shipping.phone}</p>
+                <p>N.I.F.: {shipping.nif || 'No disponible'}</p>
+                <p>Tel.: {shipping.phone || 'No disponible'}</p>
               </div>
             ) : (
               <p className="text-sm text-amber-700">

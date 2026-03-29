@@ -133,6 +133,7 @@ export async function PATCH(req: Request) {
           : typeof body.lastname === 'string'
             ? body.lastname.trim()
             : '',
+      nif: typeof shippingBody?.nif === 'string' ? shippingBody.nif.trim() : '',
       addressLine1:
         typeof shippingBody?.addressLine1 === 'string'
           ? shippingBody.addressLine1.trim()
@@ -163,6 +164,7 @@ export async function PATCH(req: Request) {
       shipping.lastname.length > 100 ||
       shipping.addressLine1.length > 150 ||
       shipping.addressLine2.length > 150 ||
+      shipping.nif.length > 20 ||
       shipping.postalCode.length > 20 ||
       shipping.city.length > 120 ||
       shipping.province.length > 120 ||

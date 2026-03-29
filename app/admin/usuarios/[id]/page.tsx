@@ -180,7 +180,8 @@ export default function UserDetailPage() {
                     <div>{formatShippingLine([user.shipping.addressLine1, user.shipping.addressLine2])}</div>
                     <div>{formatShippingLine([user.shipping.city, user.shipping.province])}</div>
                     <div>{formatShippingLine([user.shipping.postalCode, user.shipping.country])}</div>
-                    <div>{user.shipping.phone?.trim() || 'No disponible'}</div>
+                    <div>N.I.F.: {user.shipping.nif?.trim() || 'No disponible'}</div>
+                    <div>Tel.: {user.shipping.phone?.trim() || 'No disponible'}</div>
                   </dd>
                 ) : (
                   <dd className="text-gray-900 mt-0.5">{user.address || 'No disponible'}</dd>

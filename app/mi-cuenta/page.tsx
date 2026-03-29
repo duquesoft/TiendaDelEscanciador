@@ -342,18 +342,34 @@ export default function AccountPage() {
                   </div>
                 </div>
 
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                    Telefono de contacto
-                  </label>
-                  <input
-                    id="phone"
-                    type="tel"
-                    value={form.phone}
-                    onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                    maxLength={30}
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="nif" className="block text-sm font-medium text-gray-700 mb-1">
+                      N.I.F.
+                    </label>
+                    <input
+                      id="nif"
+                      type="text"
+                      value={form.nif}
+                      onChange={(e) => setForm((prev) => ({ ...prev, nif: e.target.value }))}
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                      maxLength={20}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                      Telefono de contacto
+                    </label>
+                    <input
+                      id="phone"
+                      type="tel"
+                      value={form.phone}
+                      onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                      maxLength={30}
+                    />
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -400,7 +416,8 @@ export default function AccountPage() {
                 <p className="font-medium text-gray-900">
                   {joinShippingParts([user.shipping.postalCode, user.shipping.country])}
                 </p>
-                <p className="font-medium text-gray-900">{user.shipping.phone?.trim() || 'No disponible'}</p>
+                <p className="font-medium text-gray-900">N.I.F.: {user.shipping.nif?.trim() || 'No disponible'}</p>
+                <p className="font-medium text-gray-900">Tel.: {user.shipping.phone?.trim() || 'No disponible'}</p>
                 {saveMessage && (
                   <p className="text-sm text-green-700">{saveMessage}</p>
                 )}

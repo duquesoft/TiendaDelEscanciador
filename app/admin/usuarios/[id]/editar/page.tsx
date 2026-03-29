@@ -176,6 +176,16 @@ export default function EditUserPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
               className="w-full border p-2"
+              value={user.shipping.nif}
+              onChange={(e) => setUser({
+                ...user,
+                shipping: { ...user.shipping, nif: e.target.value },
+              })}
+              placeholder="N.I.F."
+            />
+
+            <input
+              className="w-full border p-2"
               value={user.shipping.country}
               onChange={(e) => setUser({
                 ...user,

@@ -192,7 +192,8 @@ export default function AdminUsersPage() {
                                 <p className="font-medium text-gray-900">
                                   {formatShippingLine([user.shipping.postalCode, user.shipping.country])}
                                 </p>
-                                <p className="font-medium text-gray-900">{user.shipping.phone?.trim() || 'No disponible'}</p>
+                                <p className="font-medium text-gray-900">N.I.F.: {user.shipping.nif?.trim() || 'No disponible'}</p>
+                                <p className="font-medium text-gray-900">Tel.: {user.shipping.phone?.trim() || 'No disponible'}</p>
                               </div>
                             ) : (
                               <p className="text-sm">{user.address || 'No disponible'}</p>
