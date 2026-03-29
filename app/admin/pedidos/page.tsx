@@ -30,7 +30,8 @@ export default function OrdersPage() {
     const products = getOrderProducts(order.productos)
 
     if (products.length > 0) {
-      return products.map((p) => p.nombre).join(', ')
+      const unique = [...new Set(products.map((p) => p.nombre))]
+      return unique.join(', ')
     }
 
     return order.product || 'Sin producto'

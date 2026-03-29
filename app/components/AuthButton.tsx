@@ -89,13 +89,13 @@ export function AuthButton() {
       <div className="flex gap-2 opacity-80" aria-busy="true" aria-live="polite">
         <Link
           href="/login"
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          className="h-10 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition inline-flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         >
           Iniciar sesión
         </Link>
         <Link
           href="/signup"
-          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+          className="h-10 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition inline-flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
         >
           Registrarse
         </Link>
@@ -109,21 +109,21 @@ export function AuthButton() {
         <span className="text-sm text-gray-700">{user.email}</span>
         <Link
           href="/mi-cuenta"
-          className="px-3 py-2 bg-slate-700 text-white text-sm rounded-md hover:bg-slate-800 transition"
+          className="h-10 px-3 py-2 bg-slate-700 text-white text-sm rounded-md hover:bg-slate-800 transition inline-flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
         >
           Mi cuenta
         </Link>
         {isAdmin && (
           <Link
             href="/admin"
-            className="px-3 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 transition"
+            className="h-10 px-3 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 transition inline-flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
           >
             Admin
           </Link>
         )}
         <button
           onClick={handleSignOut}
-          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+          className="h-10 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition inline-flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
         >
           Cerrar sesión
         </button>
@@ -135,13 +135,13 @@ export function AuthButton() {
     <div className="flex gap-2">
       <Link
         href="/login"
-        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+        className="h-10 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition inline-flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
       >
         Iniciar sesión
       </Link>
       <Link
         href="/signup"
-        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+        className="h-10 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition inline-flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
       >
         Registrarse
       </Link>

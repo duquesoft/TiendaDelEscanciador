@@ -164,6 +164,33 @@ Las tablas usan RLS para proteger los datos:
 - ✅ Solo admins ven todos los pedidos y usuarios
 - ✅ Solo admins pueden cambiar estados
 
+### Estrategia recomendada: sesión normal vs service role
+
+Usa esta regla para evitar bugs de visibilidad en panel admin:
+
+- Sesión normal (cliente de usuario autenticado): operaciones del propio usuario.
+- Service role (solo servidor, nunca cliente): listados globales de administración.
+
+Matriz aplicada en este proyecto:
+
+- Sesión normal:
+  - `GET /api/orders` (mis pedidos)
+  - `POST /api/orders` (crear pedido propio)
+  - `GET /api/users/me` y `PATCH /api/users/me` (mi perfil/envío)
+
+- Service role (después de validar `checkAdminAccess()`):
+  - `getAllOrders()`
+  - `getOrderById()`
+  - `getOrdersByUser()`
+  - `getAdminStats()`
+  - `updateOrderStatus()`
+
+Importante:
+
+- Nunca expongas `SUPABASE_SERVICE_ROLE_KEY` en cliente.
+- Todas las operaciones con service role deben ejecutarse en servidor.
+- Si cambias políticas RLS, revisa primero los listados del panel admin.
+
 ### Protección de Rutas
 
 - `/admin/*` - Solo accesible para admins

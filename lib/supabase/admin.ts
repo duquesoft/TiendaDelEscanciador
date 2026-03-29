@@ -74,10 +74,11 @@ export async function getAllUsers() {
 }
 
 export async function getAllOrders() {
-  const supabase = await createClient()
-
   // Verificar acceso admin
   await checkAdminAccess()
+
+  // Usar service role para evitar filtros RLS en listados admin
+  const supabase = createAdminClient()
 
   const { data, error } = await supabase
     .from('orders')
@@ -93,9 +94,10 @@ export async function getAllOrders() {
 }
 
 export async function getOrderById(orderId: string) {
-  const supabase = await createClient()
-
   await checkAdminAccess()
+
+  // Usar service role para evitar filtros RLS en detalle admin
+  const supabase = createAdminClient()
 
   const { data, error } = await supabase
     .from('orders')
@@ -112,10 +114,11 @@ export async function getOrderById(orderId: string) {
 }
 
 export async function getOrdersByUser(userId: string) {
-  const supabase = await createClient()
-
   // Verificar acceso admin
   await checkAdminAccess()
+
+  // Usar service role para evitar filtros RLS en pedidos por usuario
+  const supabase = createAdminClient()
 
   const { data, error } = await supabase
     .from('orders')
@@ -158,7 +161,9 @@ export async function getAdminStats() {
   await checkAdminAccess()
 
   const { data: users, error: usersError } = await supabase.auth.admin.listUsers()
-  const { data: orders, error: ordersError } = await supabase
+  const supabaseAdmin = createAdminClient()
+
+  const { data: orders, error: ordersError } = await supabaseAdmin
     .from('orders')
     .select('total, status')
 

@@ -16,17 +16,23 @@ CREATE POLICY "Users can view their own role"
   USING (auth.uid() = user_id);
 
 -- Crear función para verificar si es admin (SECURITY DEFINER bypassa RLS)
-CREATE OR REPLACE FUNCTION public.is_admin(user_id UUID)
+CREATE OR REPLACE FUNCTION public.is_admin(p_user_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
   RETURN EXISTS(
-    SELECT 1 FROM public.user_roles WHERE user_id = user_id AND role = 'admin'
+    SELECT 1
+    FROM public.user_roles ur
+    WHERE ur.user_id = p_user_id
+      AND ur.role = 'admin'
   );
 END;
 $$;
+
+-- Endurecer búsqueda de funciones para evitar hijacking por search_path
+ALTER FUNCTION public.is_admin(UUID) SET search_path = public;
 
 -- Crear tabla de órdenes/pedidos DESPUÉS
 CREATE TABLE IF NOT EXISTS public.orders (
@@ -54,6 +60,26 @@ DROP POLICY IF EXISTS "Users can view their own orders" ON public.orders;
 CREATE POLICY "Users can view their own orders"
   ON public.orders FOR SELECT
   USING (auth.uid() = user_id OR is_admin(auth.uid()));
+
+-- Política: Users can create their own orders
+DROP POLICY IF EXISTS "Users can create their own orders" ON public.orders;
+CREATE POLICY "Users can create their own orders"
+  ON public.orders FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+-- Política: Users can update their own orders (opcional para cambios de checkout)
+DROP POLICY IF EXISTS "Users can update their own orders" ON public.orders;
+CREATE POLICY "Users can update their own orders"
+  ON public.orders FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- Política: Admins can update any order
+DROP POLICY IF EXISTS "Admins can update any order" ON public.orders;
+CREATE POLICY "Admins can update any order"
+  ON public.orders FOR UPDATE
+  USING (is_admin(auth.uid()))
+  WITH CHECK (is_admin(auth.uid()));
 
 -- Configuración global de tienda
 CREATE TABLE IF NOT EXISTS public.store_settings (

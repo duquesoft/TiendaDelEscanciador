@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { getOrderById, updateOrderStatus } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import { getOrderProducts, getOrderShipping } from '@/lib/order-data'
+import type { ShippingDetails } from '@/lib/shipping'
 
 interface OrderProduct {
   nombre: string
@@ -28,6 +29,7 @@ export default function OrderDetailPage() {
   const params = useParams()
   const router = useRouter()
   const [order, setOrder] = useState<Order | null>(null)
+  const [userShipping, setUserShipping] = useState<ShippingDetails | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -38,8 +40,18 @@ export default function OrderDetailPage() {
         const data = await getOrderById(params.id as string)
         if (!data) {
           setError('Pedido no encontrado')
-        } else {
-          setOrder(data)
+          return
+        }
+        setOrder(data)
+
+        // Si el pedido no tiene envío embebido, cargar datos actuales del usuario
+        const embeddedShipping = getOrderShipping(data.productos)
+        if (!embeddedShipping && data.user_id) {
+          const res = await fetch(`/api/admin/users/get?id=${data.user_id}`)
+          if (res.ok) {
+            const userData = await res.json()
+            setUserShipping(userData.shipping ?? null)
+          }
         }
       } catch (err) {
         setError('Error cargando el pedido')
@@ -91,7 +103,9 @@ export default function OrderDetailPage() {
     : order.product
       ? [{ nombre: order.product, precio: order.total, cantidad: order.quantity || 1 }]
       : []
-  const shipping = getOrderShipping(order.productos)
+  const embeddedShipping = getOrderShipping(order.productos)
+  const shipping = embeddedShipping ?? userShipping
+  const shippingIsFromProfile = !embeddedShipping && !!userShipping
 
   const formatShippingLine = (parts: Array<string | undefined>) => {
     const values = parts
@@ -132,6 +146,12 @@ export default function OrderDetailPage() {
               Volver
             </button>
             <Link
+              href={`/admin/usuarios/${order.user_id}`}
+              className="px-4 py-2 text-emerald-700 bg-white border border-emerald-300 rounded-md hover:bg-emerald-50"
+            >
+              Ver usuario
+            </Link>
+            <Link
               href="/admin/pedidos"
               className="px-4 py-2 text-blue-600 bg-white border border-blue-300 rounded-md hover:bg-blue-50"
             >
@@ -140,66 +160,10 @@ export default function OrderDetailPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Info principal */}
-          <div className="md:col-span-2 space-y-6">
-            {/* Productos */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Productos</h2>
-              {productos.length > 0 ? (
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-2 font-medium text-gray-700">Producto</th>
-                      <th className="text-center py-2 font-medium text-gray-700">Cantidad</th>
-                      <th className="text-right py-2 font-medium text-gray-700">Precio unit.</th>
-                      <th className="text-right py-2 font-medium text-gray-700">Subtotal</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {productos.map((p, i) => (
-                      <tr key={i} className="border-b border-gray-100">
-                        <td className="py-3 text-gray-900">{p.nombre}</td>
-                        <td className="py-3 text-center text-gray-700">{p.cantidad || 1}</td>
-                        <td className="py-3 text-right text-gray-700">€{p.precio.toFixed(2)}</td>
-                        <td className="py-3 text-right font-medium text-gray-900">
-                          €{(p.precio * (p.cantidad || 1)).toFixed(2)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <td colSpan={3} className="pt-4 text-right font-semibold text-gray-900">
-                        Total
-                      </td>
-                      <td className="pt-4 text-right font-bold text-gray-900 text-base">
-                        €{order.total.toFixed(2)}
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-              ) : (
-                <p className="text-gray-500 text-sm">Sin productos registrados</p>
-              )}
-            </div>
+        <div className="space-y-6">
 
-            {shipping && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Envío congelado del pedido</h2>
-                <div className="text-sm text-gray-900 space-y-1">
-                  <p className="font-medium">{formatShippingLine([shipping.name, shipping.lastname])}</p>
-                  <p className="font-medium">{formatShippingLine([shipping.addressLine1, shipping.addressLine2])}</p>
-                  <p className="font-medium">{formatShippingLine([shipping.city, shipping.province])}</p>
-                  <p className="font-medium">{formatShippingLine([shipping.postalCode, shipping.country])}</p>
-                  <p className="font-medium">{shipping.phone?.trim() || 'No disponible'}</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Sidebar: estado + info */}
-          <div className="space-y-6">
+          {/* Fila superior: Estado + Dirección de envío */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Estado */}
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Estado</h2>
@@ -227,35 +191,95 @@ export default function OrderDetailPage() {
               </div>
             </div>
 
-            {/* Detalles */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Información</h2>
-              <dl className="space-y-3 text-sm">
-                <div>
-                  <dt className="font-medium text-gray-500">Usuario ID</dt>
-                  <dd className="text-gray-900 break-all mt-0.5">{order.user_id}</dd>
+            {/* Dirección de envío */}
+            {shipping ? (
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Dirección de envío</h2>
+                {shippingIsFromProfile && (
+                  <p className="text-xs text-amber-600 mb-3">Datos actuales del perfil del usuario</p>
+                )}
+                <div className="text-sm text-gray-900 space-y-1">
+                  <p>{formatShippingLine([shipping.name, shipping.lastname])}</p>
+                  <p>{formatShippingLine([shipping.addressLine1, shipping.addressLine2])}</p>
+                  <p>{formatShippingLine([shipping.city, shipping.province])}</p>
+                  <p>{formatShippingLine([shipping.postalCode, shipping.country])}</p>
+                  <p>{shipping.phone?.trim() || 'Sin teléfono'}</p>
                 </div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Dirección de envío</h2>
+                <p className="text-sm text-gray-500">No disponible</p>
+              </div>
+            )}
+          </div>
+
+          {/* Productos */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Productos</h2>
+            {productos.length > 0 ? (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-2 font-medium text-gray-700">Producto</th>
+                    <th className="text-center py-2 font-medium text-gray-700">Cantidad</th>
+                    <th className="text-right py-2 font-medium text-gray-700">Precio unit.</th>
+                    <th className="text-right py-2 font-medium text-gray-700">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {productos.map((p, i) => (
+                    <tr key={i} className="border-b border-gray-100">
+                      <td className="py-3 text-gray-900">{p.nombre}</td>
+                      <td className="py-3 text-center text-gray-700">{p.cantidad || 1}</td>
+                      <td className="py-3 text-right text-gray-700">€{p.precio.toFixed(2)}</td>
+                      <td className="py-3 text-right font-medium text-gray-900">
+                        €{(p.precio * (p.cantidad || 1)).toFixed(2)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colSpan={3} className="pt-4 text-right font-semibold text-gray-900">
+                      Total
+                    </td>
+                    <td className="pt-4 text-right font-bold text-gray-900 text-base">
+                      €{order.total.toFixed(2)}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            ) : (
+              <p className="text-gray-500 text-sm">Sin productos registrados</p>
+            )}
+          </div>
+
+          {/* Información */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Información</h2>
+            <dl className="flex flex-wrap gap-x-12 gap-y-3 text-sm">
+              <div>
+                <dt className="font-medium text-gray-500">Fecha de compra</dt>
+                <dd className="text-gray-900 mt-0.5">
+                  {new Date(order.created_at).toLocaleString('es-ES')}
+                </dd>
+              </div>
+              {order.updated_at && (
                 <div>
-                  <dt className="font-medium text-gray-500">Fecha de compra</dt>
+                  <dt className="font-medium text-gray-500">Última actualización</dt>
                   <dd className="text-gray-900 mt-0.5">
-                    {new Date(order.created_at).toLocaleString('es-ES')}
+                    {new Date(order.updated_at).toLocaleString('es-ES')}
                   </dd>
                 </div>
-                {order.updated_at && (
-                  <div>
-                    <dt className="font-medium text-gray-500">Última actualización</dt>
-                    <dd className="text-gray-900 mt-0.5">
-                      {new Date(order.updated_at).toLocaleString('es-ES')}
-                    </dd>
-                  </div>
-                )}
-                <div>
-                  <dt className="font-medium text-gray-500">Total</dt>
-                  <dd className="text-gray-900 font-bold mt-0.5">€{order.total.toFixed(2)}</dd>
-                </div>
-              </dl>
-            </div>
+              )}
+              <div>
+                <dt className="font-medium text-gray-500">Total</dt>
+                <dd className="text-gray-900 font-bold mt-0.5">€{order.total.toFixed(2)}</dd>
+              </div>
+            </dl>
           </div>
+
         </div>
       </div>
     </div>
