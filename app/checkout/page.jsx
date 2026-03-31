@@ -197,7 +197,7 @@ export default function Checkout() {
 
             <Link
               href="/"
-              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg text-lg font-semibold hover:bg-gray-50 transition"
+              className="px-6 py-3 bg-red-600 text-white rounded-lg text-lg font-semibold hover:bg-red-700 transition"
             >
               Cancelar
             </Link>
