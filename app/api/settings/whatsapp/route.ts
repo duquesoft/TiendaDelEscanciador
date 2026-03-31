@@ -3,7 +3,7 @@ import { createClient as createAdminClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
 
-export const DEFAULT_WHATSAPP_NUMBER = ''
+const DEFAULT_WHATSAPP_NUMBER = ''
 
 export async function GET() {
   try {
