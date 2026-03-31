@@ -56,7 +56,7 @@ export default async function ProductoPage() {
         sku: String(product.id),
         offers: {
           "@type": "Offer",
-          url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://escanciadorsidra.com"}/producto`,
+          url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.escancidorbarato.com"}/producto`,
           priceCurrency: "EUR",
           price: Number(product.price || 0).toFixed(2),
           availability: "https://schema.org/InStock",

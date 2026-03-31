@@ -84,7 +84,7 @@ CREATE POLICY "Admins can update any order"
 -- Configuración global de tienda
 CREATE TABLE IF NOT EXISTS public.store_settings (
   key TEXT PRIMARY KEY,
-  value NUMERIC NOT NULL,
+  value TEXT NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

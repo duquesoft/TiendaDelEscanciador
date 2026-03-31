@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { normalizeShippingFee, parseShippingFeeRecord } from '@/lib/shipping-fee'
+import { normalizeHeaderTheme, parseHeaderThemeRecord } from '@/lib/header-theme'
 
 export const dynamic = 'force-dynamic'
 
@@ -49,16 +49,16 @@ export async function GET() {
     const { data, error } = await supabaseAdmin
       .from('store_settings')
       .select('value')
-      .eq('key', 'shipping_fee')
+      .eq('key', 'header_theme')
       .maybeSingle()
 
     if (error) {
       return NextResponse.json({ error: 'No se pudo leer la configuración' }, { status: 500 })
     }
 
-    return NextResponse.json({ shippingFee: parseShippingFeeRecord(data) })
+    return NextResponse.json({ headerTheme: parseHeaderThemeRecord(data) })
   } catch (error) {
-    console.error('GET /api/admin/settings/shipping-fee error:', error)
+    console.error('GET /api/admin/settings/header-theme error:', error)
     return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
   }
 }
@@ -75,7 +75,7 @@ export async function PUT(req: NextRequest) {
     }
 
     const body = await req.json()
-    const shippingFee = normalizeShippingFee(body?.shippingFee)
+    const headerTheme = normalizeHeaderTheme(body?.headerTheme)
 
     const supabaseAdmin = createAdminClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -86,27 +86,21 @@ export async function PUT(req: NextRequest) {
       .from('store_settings')
       .upsert(
         {
-          key: 'shipping_fee',
-          value: String(shippingFee),
+          key: 'header_theme',
+          value: headerTheme,
           updated_at: new Date().toISOString(),
         },
         { onConflict: 'key' }
       )
 
     if (error) {
-      console.error('Error saving shipping fee setting:', error)
-      return NextResponse.json(
-        {
-          error:
-            'No se pudo guardar la configuración. Verifica que exista la tabla public.store_settings.',
-        },
-        { status: 500 }
-      )
+      console.error('Error saving header theme setting:', error)
+      return NextResponse.json({ error: 'No se pudo guardar la configuración.' }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, shippingFee })
+    return NextResponse.json({ success: true, headerTheme })
   } catch (error) {
-    console.error('PUT /api/admin/settings/shipping-fee error:', error)
+    console.error('PUT /api/admin/settings/header-theme error:', error)
     return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
   }
 }

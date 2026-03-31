@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
 import Link from 'next/link'
 
-export function AuthButton() {
+export function AuthButton({ darkText = false }: { darkText?: boolean } = {}) {
   const [user, setUser] = useState<User | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [authChecked, setAuthChecked] = useState(false)
@@ -106,7 +106,7 @@ export function AuthButton() {
   if (user) {
     return (
       <div className="flex items-center gap-3">
-        <span className="text-sm text-gray-700">{user.email}</span>
+        <span className={`text-sm ${darkText ? 'text-gray-800' : 'text-gray-100'}`}>{user.email}</span>
         <Link
           href="/mi-cuenta"
           className="h-10 px-3 py-2 bg-slate-700 text-white text-sm rounded-md hover:bg-slate-800 transition inline-flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"

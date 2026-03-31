@@ -136,7 +136,7 @@ export default function ProductoClient({ initialProducts }) {
 
               <button
                 onClick={añadirAlCarrito}
-                className="bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg text-base sm:text-lg font-semibold shadow-md transition-transform hover:scale-105 mt-6"
+                className="bg-gradient-to-r from-emerald-400 to-green-400 hover:from-emerald-500 hover:to-green-500 text-slate-950 py-4 px-10 rounded-xl text-xl font-semibold shadow-[0_12px_28px_rgba(34,197,94,0.20)] transition-transform hover:scale-105 mt-6"
               >
                 Añadir al carrito
               </button>

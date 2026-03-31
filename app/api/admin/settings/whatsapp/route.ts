@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { normalizeShippingFee, parseShippingFeeRecord } from '@/lib/shipping-fee'
 
 export const dynamic = 'force-dynamic'
+
+const DEFAULT_WHATSAPP_NUMBER = ''
 
 async function isCurrentUserAdmin() {
   const supabase = await createClient()
@@ -49,16 +50,21 @@ export async function GET() {
     const { data, error } = await supabaseAdmin
       .from('store_settings')
       .select('value')
-      .eq('key', 'shipping_fee')
+      .eq('key', 'whatsapp_number')
       .maybeSingle()
 
     if (error) {
       return NextResponse.json({ error: 'No se pudo leer la configuración' }, { status: 500 })
     }
 
-    return NextResponse.json({ shippingFee: parseShippingFeeRecord(data) })
+    const value =
+      data && typeof data === 'object' && 'value' in data && typeof data.value === 'string'
+        ? data.value
+        : DEFAULT_WHATSAPP_NUMBER
+
+    return NextResponse.json({ whatsappNumber: value })
   } catch (error) {
-    console.error('GET /api/admin/settings/shipping-fee error:', error)
+    console.error('GET /api/admin/settings/whatsapp error:', error)
     return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
   }
 }
@@ -75,7 +81,16 @@ export async function PUT(req: NextRequest) {
     }
 
     const body = await req.json()
-    const shippingFee = normalizeShippingFee(body?.shippingFee)
+    const raw: unknown = body?.whatsappNumber
+
+    if (typeof raw !== 'string' || !/^\d{7,15}$/.test(raw.trim())) {
+      return NextResponse.json(
+        { error: 'Número de teléfono inválido. Solo dígitos, entre 7 y 15 caracteres.' },
+        { status: 400 }
+      )
+    }
+
+    const whatsappNumber = raw.trim()
 
     const supabaseAdmin = createAdminClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -86,27 +101,21 @@ export async function PUT(req: NextRequest) {
       .from('store_settings')
       .upsert(
         {
-          key: 'shipping_fee',
-          value: String(shippingFee),
+          key: 'whatsapp_number',
+          value: whatsappNumber,
           updated_at: new Date().toISOString(),
         },
         { onConflict: 'key' }
       )
 
     if (error) {
-      console.error('Error saving shipping fee setting:', error)
-      return NextResponse.json(
-        {
-          error:
-            'No se pudo guardar la configuración. Verifica que exista la tabla public.store_settings.',
-        },
-        { status: 500 }
-      )
+      console.error('Error saving whatsapp setting:', error)
+      return NextResponse.json({ error: 'No se pudo guardar la configuración.' }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, shippingFee })
+    return NextResponse.json({ success: true, whatsappNumber })
   } catch (error) {
-    console.error('PUT /api/admin/settings/shipping-fee error:', error)
+    console.error('PUT /api/admin/settings/whatsapp error:', error)
     return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
   }
 }

@@ -69,10 +69,21 @@ export default function Home() {
 
         <Link
           href="/producto"
-          className="inline-block bg-green-600 hover:bg-green-700 text-white py-4 px-10 rounded-xl text-xl font-semibold shadow-lg transition-transform hover:scale-105"
+          className="inline-block bg-gradient-to-r from-emerald-400 to-green-400 hover:from-emerald-500 hover:to-green-500 text-slate-950 py-4 px-10 rounded-xl text-xl font-semibold shadow-[0_12px_28px_rgba(34,197,94,0.20)] transition-transform hover:scale-105"
         >
           Comprar ahora
         </Link>
+
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm">
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/85 border border-gray-200 px-4 py-2 text-gray-700 shadow-sm">
+            <span aria-hidden="true">🔒</span>
+            Pago seguro
+          </span>
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/85 border border-gray-200 px-4 py-2 text-gray-700 shadow-sm">
+            <span aria-hidden="true">🚚</span>
+            Envío rápido 24/72h
+          </span>
+        </div>
       </section>
 
       <section className="max-w-3xl mx-auto text-center mb-10 px-2">
