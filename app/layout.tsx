@@ -5,11 +5,11 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { DEFAULT_HEADER_THEME, HeaderTheme, parseHeaderThemeRecord } from "@/lib/header-theme";
-import { unstable_cache } from "next/cache";
+import { unstable_noStore as noStore } from "next/cache";
 
 const DEFAULT_WHATSAPP_NUMBER = "";
 
-const getWhatsappNumber = unstable_cache(async (): Promise<string> => {
+async function getWhatsappNumber(): Promise<string> {
   try {
     const supabaseAdmin = createAdminClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -28,9 +28,9 @@ const getWhatsappNumber = unstable_cache(async (): Promise<string> => {
   } catch {
     return DEFAULT_WHATSAPP_NUMBER;
   }
-}, ["store-settings-whatsapp-number"], { revalidate: 300, tags: ["store-settings"] });
+}
 
-const getHeaderTheme = unstable_cache(async (): Promise<HeaderTheme> => {
+async function getHeaderTheme(): Promise<HeaderTheme> {
   try {
     const supabaseAdmin = createAdminClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -49,7 +49,7 @@ const getHeaderTheme = unstable_cache(async (): Promise<HeaderTheme> => {
   } catch {
     return DEFAULT_HEADER_THEME;
   }
-}, ["store-settings-header-theme"], { revalidate: 300, tags: ["store-settings"] });
+}
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.escancidorbarato.com";
 
@@ -134,6 +134,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  noStore();
   const whatsappNumber = await getWhatsappNumber();
   const headerTheme = await getHeaderTheme();
   const websiteJsonLd = {

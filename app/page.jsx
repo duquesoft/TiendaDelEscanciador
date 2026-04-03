@@ -233,12 +233,7 @@ export default function Home() {
               onLoadedMetadata={setPremiumPlaybackRate}
               className="w-full h-full object-cover object-top rounded-xl brightness-[1.03] contrast-[1.05] saturate-[1.02]"
             >
-              {debeCargarVideo ? (
-                <>
-                  <source src="/video/video1-optimized.webm" type="video/webm" />
-                  <source src="/video/video1-optimized.mp4" type="video/mp4" />
-                </>
-              ) : null}
+              {debeCargarVideo ? <source src="/video/video1.webm" type="video/webm" /> : null}
             </video>
             <div className="absolute inset-[1px] pointer-events-none rounded-[11px] border border-white/70" />
           </div>
@@ -284,12 +279,7 @@ export default function Home() {
               onLoadedMetadata={setPremiumPlaybackRate}
               className="w-full h-full object-cover object-top rounded-xl brightness-[1.03] contrast-[1.05] saturate-[1.02]"
             >
-              {debeCargarVideo ? (
-                <>
-                  <source src="/video/video1-optimized.webm" type="video/webm" />
-                  <source src="/video/video1-optimized.mp4" type="video/mp4" />
-                </>
-              ) : null}
+              {debeCargarVideo ? <source src="/video/video1.webm" type="video/webm" /> : null}
             </video>
             <div className="absolute inset-[1px] pointer-events-none rounded-[11px] border border-white/70" />
           </div>
