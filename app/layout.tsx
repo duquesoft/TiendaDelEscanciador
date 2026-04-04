@@ -3,6 +3,8 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import CookieConsent from "./components/CookieConsent";
+import IgnoreExtensionErrors from "./components/IgnoreExtensionErrors";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { DEFAULT_HEADER_THEME, HeaderTheme, parseHeaderThemeRecord } from "@/lib/header-theme";
 import { unstable_noStore as noStore } from "next/cache";
@@ -156,6 +158,7 @@ export default async function RootLayout({
       className={`${geist.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-screen flex flex-col">
+        <IgnoreExtensionErrors />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -167,6 +170,7 @@ export default async function RootLayout({
           {children}
         </main>
         <Footer />
+        <CookieConsent />
         {whatsappNumber ? (
         <a
           href={`https://wa.me/${whatsappNumber}`}

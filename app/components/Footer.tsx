@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { openCookiePreferences } from '@/lib/cookie-consent'
 
 function formatWhatsappDisplay(raw: string): string {
   const digits = raw.replace(/\D/g, '')
@@ -64,6 +65,15 @@ export default function Footer() {
                 <Link href="/politica-cookies" className="text-gray-400 hover:text-white transition">
                   Política de Cookies
                 </Link>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={openCookiePreferences}
+                  className="text-gray-400 hover:text-white transition"
+                >
+                  Configurar Cookies
+                </button>
               </li>
               <li>
                 <Link href="/politica-privacidad" className="text-gray-400 hover:text-white transition">
