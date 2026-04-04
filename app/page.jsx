@@ -29,6 +29,7 @@ export default function Home() {
   const [pausadoIzquierda, setPausadoIzquierda] = useState(false);
   const [pausadoDerecha, setPausadoDerecha] = useState(false);
   const [debeCargarVideo, setDebeCargarVideo] = useState(false);
+  const [esMovil, setEsMovil] = useState(null);
   const videoSectionRef = useRef(null);
   const totalImagenesIzquierda = imagenesIzquierda.length;
   const totalImagenesDerecha = imagenesDerecha.length;
@@ -154,6 +155,21 @@ export default function Home() {
     return () => observer.disconnect();
   }, [debeCargarVideo]);
 
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+
+    const actualizarViewport = () => {
+      setEsMovil(mediaQuery.matches);
+    };
+
+    actualizarViewport();
+    mediaQuery.addEventListener("change", actualizarViewport);
+
+    return () => {
+      mediaQuery.removeEventListener("change", actualizarViewport);
+    };
+  }, []);
+
   return (
     <div className="max-w-6xl mx-auto px-6">
 
@@ -238,7 +254,7 @@ export default function Home() {
               onLoadedMetadata={setPremiumPlaybackRate}
               className="w-full h-full object-cover object-top rounded-xl brightness-[1.03] contrast-[1.05] saturate-[1.02]"
             >
-              {debeCargarVideo ? (
+              {debeCargarVideo && esMovil === false ? (
                 <>
                   <source src="/video/video1-optimized.webm" type="video/webm" />
                   <source src="/video/video1-optimized.mp4" type="video/mp4" />
@@ -293,7 +309,7 @@ export default function Home() {
               onLoadedMetadata={setPremiumPlaybackRate}
               className="w-full h-full object-cover object-top rounded-xl brightness-[1.03] contrast-[1.05] saturate-[1.02]"
             >
-              {debeCargarVideo ? (
+              {debeCargarVideo && esMovil === true ? (
                 <>
                   <source src="/video/video1-optimized.webm" type="video/webm" />
                   <source src="/video/video1-optimized.mp4" type="video/mp4" />
