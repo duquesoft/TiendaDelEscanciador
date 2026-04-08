@@ -3,38 +3,22 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { openCookiePreferences } from '@/lib/cookie-consent'
+import { formatWhatsappDisplay, subscribeWhatsappContactUpdated } from '@/lib/whatsapp-contact'
 
-function formatWhatsappDisplay(raw: string): string {
-  const digits = raw.replace(/\D/g, '')
-
-  if (!digits) return ''
-
-  const inferredPrefixLength = digits.length > 10 ? digits.length - 9 : 2
-  const prefixLength = Math.min(Math.max(inferredPrefixLength, 1), 3)
-  const prefix = digits.slice(0, prefixLength)
-  const rest = digits.slice(prefixLength)
-
-  return rest ? `+${prefix} ${rest}` : `+${prefix}`
+type FooterProps = {
+  initialWhatsappNumber?: string
 }
 
-export default function Footer() {
+export default function Footer({ initialWhatsappNumber = '' }: FooterProps) {
   const currentYear = new Date().getFullYear()
-  const [whatsappNumber, setWhatsappNumber] = useState('')
+  const [whatsappNumber, setWhatsappNumber] = useState(initialWhatsappNumber)
   const whatsappDisplay = formatWhatsappDisplay(whatsappNumber)
 
   useEffect(() => {
-    const loadWhatsappNumber = async () => {
-      try {
-        const response = await fetch('/api/settings/whatsapp')
-        const data = await response.json()
-        setWhatsappNumber(data.whatsappNumber || '')
-      } catch (error) {
-        console.error('Error loading WhatsApp number:', error)
-      }
-    }
+    setWhatsappNumber(initialWhatsappNumber)
+  }, [initialWhatsappNumber])
 
-    loadWhatsappNumber()
-  }, [])
+  useEffect(() => subscribeWhatsappContactUpdated(setWhatsappNumber), [])
 
   return (
     <footer className="bg-gray-900 text-gray-300">
@@ -43,7 +27,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-white font-bold text-lg mb-4">www.escanciadorbarato.com</h3>
+            <h3 className="text-white font-bold text-lg mb-4">www.TiendaDelEscanciador.com</h3>
             <p className="text-sm text-gray-400">Venta online de escanciadores de sidra automáticos de calidad.</p>
           </div>
 
@@ -121,8 +105,8 @@ export default function Footer() {
                     <path d="m4 8 8 6 8-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </span>
-                <a href="mailto:duquesoft@gmail.com" className="text-gray-400 hover:text-white transition">
-                  duquesoft@gmail.com
+                <a href="mailto:contacto@tiendadelescanciador.com" className="text-gray-400 hover:text-white transition">
+                  contacto@tiendadelescanciador.com
                 </a>
               </li>
               {whatsappNumber && (
@@ -146,7 +130,7 @@ export default function Footer() {
 
         {/* Bottom Footer */}
         <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
-          <p>© {currentYear} www.escanciadorbarato.com. Todos los derechos reservados.</p>
+          <p>© {currentYear} www.TiendaDelEscanciador.com. Todos los derechos reservados.</p>
           <div className="flex gap-4 mt-4 md:mt-0">
             <a href="#" className="hover:text-white transition" aria-label="Facebook">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

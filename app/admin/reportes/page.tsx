@@ -48,10 +48,10 @@ export default function ReportsPage() {
   }
 
   // Cálculos (solo pedidos con ingreso consolidado)
-  const revenueOrders = orders.filter((o) => o.status === 'paid' || o.status === 'completed')
+  const revenueOrders = orders.filter((o) => o.status === 'paid' || o.status === 'shipped' || o.status === 'completed')
   const totalRevenue = revenueOrders.reduce((sum, order) => sum + order.total, 0)
   const avgOrderValue = revenueOrders.length > 0 ? totalRevenue / revenueOrders.length : 0
-  const completedCount = orders.filter((o) => o.status === 'completed').length
+  const shippedCount = orders.filter((o) => o.status === 'shipped' || o.status === 'completed').length
   const paidCount = orders.filter((o) => o.status === 'paid').length
   const pendingCount = orders.filter((o) => o.status === 'pending').length
   const cancelledCount = orders.filter((o) => o.status === 'cancelled').length
@@ -108,10 +108,10 @@ export default function ReportsPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Reportes y Estadísticas</h1>
-          <Link href="/admin/dashboard" className="text-blue-600 hover:text-blue-700">
+      <div className="max-w-7xl mx-auto p-4 md:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Reportes y Estadísticas</h1>
+          <Link href="/admin/dashboard" className="text-blue-600 hover:text-blue-700 text-sm md:text-base">
             Volver al dashboard
           </Link>
         </div>
@@ -127,8 +127,8 @@ export default function ReportsPage() {
             <p className="text-3xl font-bold text-gray-900 mt-2">€{avgOrderValue.toFixed(2)}</p>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
-            <p className="text-gray-600 text-sm font-medium">Completados</p>
-            <p className="text-3xl font-bold text-green-600 mt-2">{completedCount}</p>
+            <p className="text-gray-600 text-sm font-medium">Enviados</p>
+            <p className="text-3xl font-bold text-green-600 mt-2">{shippedCount}</p>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
             <p className="text-gray-600 text-sm font-medium">Pago completado</p>

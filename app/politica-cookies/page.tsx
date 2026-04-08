@@ -130,7 +130,7 @@ export default function PoliticaCookiesPage() {
           <section>
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">Tus derechos</h2>
             <p>
-              Puedes retirar o modificar tu consentimiento en cualquier momento con la misma facilidad con la que lo otorgaste. Si deseas ejercer tus derechos de protección de datos o tienes dudas sobre esta política, puedes escribir a <strong>duquesoft@gmail.com</strong>.
+              Puedes retirar o modificar tu consentimiento en cualquier momento con la misma facilidad con la que lo otorgaste. Si deseas ejercer tus derechos de protección de datos o tienes dudas sobre esta política, puedes escribir a <strong>contacto@tiendadelescanciador.com</strong>.
             </p>
           </section>
 

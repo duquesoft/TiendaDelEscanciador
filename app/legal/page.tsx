@@ -7,9 +7,9 @@ export default function AvisoLegalPage() {
         <div className="bg-white rounded-lg shadow p-8 space-y-6 text-gray-700">
           <section>
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">Identificación del Responsable</h2>
-            <p className="mb-2">Nombre: Escancidor Barato (www.escancidorbarato.com)</p>
+            <p className="mb-2">Nombre: Tienda del Escanciador (www.TiendaDelEscanciador.com)</p>
             <p className="mb-2">Domicilio: [Inserta tu dirección aquí]</p>
-            <p className="mb-2">Correo electrónico: duquesoft@gmail.com</p>
+            <p className="mb-2">Correo electrónico: contacto@tiendadelescanciador.com</p>
           </section>
 
           <section>
@@ -32,7 +32,7 @@ export default function AvisoLegalPage() {
           <section>
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">Limitación de Responsabilidad</h2>
             <p>
-              En la medida permitida por la ley, Escancidor Barato no será responsable por daños indirectos, incidentales, especiales o consecuentes derivados del acceso o uso del sitio web, incluso si se ha advertido de la posibilidad de tales daños.
+              En la medida permitida por la ley, Tienda del Escanciador no será responsable por daños indirectos, incidentales, especiales o consecuentes derivados del acceso o uso del sitio web, incluso si se ha advertido de la posibilidad de tales daños.
             </p>
           </section>
 

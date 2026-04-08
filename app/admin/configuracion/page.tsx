@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import type { HeaderTheme } from '@/lib/header-theme'
+import { dispatchWhatsappContactUpdated } from '@/lib/whatsapp-contact'
 
 export default function AdminConfiguracionPage() {
   const [shippingFeeInput, setShippingFeeInput] = useState('0')
@@ -21,6 +22,12 @@ export default function AdminConfiguracionPage() {
   const [headerThemeLoading, setHeaderThemeLoading] = useState(true)
   const [headerThemeSaving, setHeaderThemeSaving] = useState(false)
   const [headerThemeMessage, setHeaderThemeMessage] = useState<string | null>(null)
+
+  const [maintenanceModeInput, setMaintenanceModeInput] = useState(false)
+  const [maintenanceModeSaved, setMaintenanceModeSaved] = useState(false)
+  const [maintenanceLoading, setMaintenanceLoading] = useState(true)
+  const [maintenanceSaving, setMaintenanceSaving] = useState(false)
+  const [maintenanceMessage, setMaintenanceMessage] = useState<string | null>(null)
 
   useEffect(() => {
     const loadShippingFee = async () => {
@@ -81,9 +88,30 @@ export default function AdminConfiguracionPage() {
       }
     }
 
+    const loadMaintenanceMode = async () => {
+      try {
+        const response = await fetch('/api/admin/settings/maintenance')
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data?.error || 'No se pudo cargar el modo mantenimiento')
+        }
+
+        const mode = Boolean(data.maintenanceMode)
+        setMaintenanceModeInput(mode)
+        setMaintenanceModeSaved(mode)
+      } catch (err) {
+        console.error(err)
+        setMaintenanceMessage('No se pudo cargar el modo mantenimiento')
+      } finally {
+        setMaintenanceLoading(false)
+      }
+    }
+
     loadShippingFee()
     loadWhatsapp()
     loadHeaderTheme()
+    loadMaintenanceMode()
   }, [])
 
   const saveWhatsapp = async () => {
@@ -113,6 +141,7 @@ export default function AdminConfiguracionPage() {
       const saved = data.whatsappNumber ?? trimmed
       setWhatsappInput(saved)
       setWhatsappSaved(saved)
+      dispatchWhatsappContactUpdated(saved)
       setWhatsappMessage('Número de WhatsApp actualizado correctamente')
     } catch (err) {
       console.error(err)
@@ -189,12 +218,43 @@ export default function AdminConfiguracionPage() {
     }
   }
 
+  const saveMaintenanceMode = async () => {
+    setMaintenanceSaving(true)
+    setMaintenanceMessage(null)
+
+    try {
+      const response = await fetch('/api/admin/settings/maintenance', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ maintenanceMode: maintenanceModeInput }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'No se pudo guardar el modo mantenimiento')
+      }
+
+      const savedMode = Boolean(data.maintenanceMode)
+      setMaintenanceModeInput(savedMode)
+      setMaintenanceModeSaved(savedMode)
+      setMaintenanceMessage('Modo mantenimiento actualizado correctamente')
+    } catch (err) {
+      console.error(err)
+      setMaintenanceMessage('No se pudo guardar el modo mantenimiento')
+    } finally {
+      setMaintenanceSaving(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Configuración de tienda</h1>
-          <Link href="/admin/dashboard" className="text-blue-600 hover:text-blue-700">
+      <div className="max-w-4xl mx-auto p-4 md:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Configuración de tienda</h1>
+          <Link href="/admin/dashboard" className="text-blue-600 hover:text-blue-700 text-sm md:text-base">
             Volver al dashboard
           </Link>
         </div>
@@ -297,6 +357,53 @@ export default function AdminConfiguracionPage() {
           {headerThemeMessage && (
             <p className={`text-sm mt-3 ${headerThemeMessage.includes('correctamente') ? 'text-green-700' : 'text-red-600'}`}>
               {headerThemeMessage}
+            </p>
+          )}
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6 mt-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Modo mantenimiento</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Cuando está activado, los usuarios verán una pantalla de mantenimiento y no podrán crear
+            pedidos nuevos. Podrán seguir iniciando sesión y consultar <code className="bg-gray-100 px-1 rounded">Mi cuenta</code>.
+          </p>
+
+          {!maintenanceLoading && (
+            <p className="text-sm text-gray-700 mb-4">
+              <span className="font-medium">Estado actual:</span>{' '}
+              <span className={`font-semibold ${maintenanceModeSaved ? 'text-amber-700' : 'text-green-700'}`}>
+                {maintenanceModeSaved ? 'Activado' : 'Desactivado'}
+              </span>
+            </p>
+          )}
+
+          {maintenanceLoading ? (
+            <p className="text-sm text-gray-500">Cargando configuración...</p>
+          ) : (
+            <div className="space-y-4">
+              <label className="inline-flex items-center gap-3 text-sm text-gray-800">
+                <input
+                  type="checkbox"
+                  checked={maintenanceModeInput}
+                  onChange={(e) => setMaintenanceModeInput(e.target.checked)}
+                />
+                Activar modo mantenimiento
+              </label>
+
+              <button
+                type="button"
+                onClick={saveMaintenanceMode}
+                disabled={maintenanceSaving}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400"
+              >
+                {maintenanceSaving ? 'Guardando...' : 'Guardar cambios'}
+              </button>
+            </div>
+          )}
+
+          {maintenanceMessage && (
+            <p className={`text-sm mt-3 ${maintenanceMessage.includes('correctamente') ? 'text-green-700' : 'text-red-600'}`}>
+              {maintenanceMessage}
             </p>
           )}
         </div>

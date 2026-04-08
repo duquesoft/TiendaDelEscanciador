@@ -1,24 +1,50 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useSyncExternalStore, useState } from "react";
 import { useRouter } from "next/navigation";   // ← IMPORTANTE
 
+const CART_SQUARE_IMAGE = "/img/escanciador_fondo_blanco_1_1_cart.webp";
+
+function getStoredCartSnapshot() {
+  if (typeof window === "undefined") {
+    return "[]";
+  }
+
+  try {
+    return localStorage.getItem("carrito") || "[]";
+  } catch {
+    return "[]";
+  }
+}
+
+function subscribeToCart(onStoreChange) {
+  if (typeof window === "undefined") {
+    return () => {};
+  }
+
+  window.addEventListener("carrito-actualizado", onStoreChange);
+  window.addEventListener("storage", onStoreChange);
+
+  return () => {
+    window.removeEventListener("carrito-actualizado", onStoreChange);
+    window.removeEventListener("storage", onStoreChange);
+  };
+}
+
 export default function Carrito() {
-  const [carrito, setCarrito] = useState([]);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const cartSnapshot = useSyncExternalStore(subscribeToCart, getStoredCartSnapshot, () => "[]");
+  const carrito = useMemo(() => {
+    try {
+      const parsedCart = JSON.parse(cartSnapshot);
+      return Array.isArray(parsedCart) ? parsedCart : [];
+    } catch {
+      return [];
+    }
+  }, [cartSnapshot]);
   const router = useRouter();                  // ← IMPORTANTE
   const [shippingFee, setShippingFee] = useState(0)
 
   useEffect(() => {
-    try {
-      const storedCart = JSON.parse(localStorage.getItem("carrito")) || []
-      setCarrito(Array.isArray(storedCart) ? storedCart : [])
-    } catch {
-      setCarrito([])
-    }
-
-    setIsHydrated(true)
-
     const loadShippingFee = async () => {
       try {
         const response = await fetch('/api/settings/shipping-fee')
@@ -35,19 +61,9 @@ export default function Carrito() {
     loadShippingFee()
   }, [])
 
-  if (!isHydrated) {
-    return (
-      <div className="max-w-4xl mx-auto px-6 py-10">
-        <h1 className="text-3xl font-bold mb-6">Carrito</h1>
-        <p className="text-gray-600">Cargando carrito...</p>
-      </div>
-    )
-  }
-
   const eliminarProducto = (index) => {
     const nuevoCarrito = [...carrito];
     nuevoCarrito.splice(index, 1);
-    setCarrito(nuevoCarrito);
     localStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
 
     window.dispatchEvent(new Event("carrito-actualizado"));
@@ -58,6 +74,14 @@ export default function Carrito() {
 
   const finalizarCompra = () => {
     router.push("/checkout");   // ← AQUÍ ES DONDE OCURRE LA MAGIA
+  };
+
+  const getCartProductImage = (producto) => {
+    if (typeof producto?.imagenCarrito === "string" && producto.imagenCarrito.trim()) {
+      return producto.imagenCarrito;
+    }
+
+    return CART_SQUARE_IMAGE;
   };
 
   return (
@@ -76,7 +100,7 @@ export default function Carrito() {
             >
               <div className="flex items-center gap-4">
                 <img
-                  src={producto.imagen}
+                  src={getCartProductImage(producto)}
                   className="w-20 h-20 rounded-lg object-cover"
                   alt={producto.nombre || "Producto en carrito"}
                 />

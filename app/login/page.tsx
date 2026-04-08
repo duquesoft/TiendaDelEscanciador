@@ -2,17 +2,25 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { translateSupabaseAuthError } from '@/lib/supabase/auth-errors'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
+
+  const redirectTarget = searchParams.get('redirect')
+  const safeRedirect =
+    redirectTarget && redirectTarget.startsWith('/') && !redirectTarget.startsWith('//')
+      ? redirectTarget
+      : '/'
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,7 +38,7 @@ export default function LoginPage() {
         return
       }
 
-      router.push('/')
+      router.push(safeRedirect)
       router.refresh()
     } catch {
       setError('Error al iniciar sesión')

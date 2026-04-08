@@ -8,7 +8,7 @@ export default function TerminosCondicionesPage() {
           <section>
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">1. Aceptación de los Términos</h2>
             <p>
-              Al acceder y utilizar el sitio web www.escancidorbarato.com, aceptas estar vinculado por estos Términos y Condiciones. Si no aceptas alguno de estos términos, no debes acceder ni utilizar el sitio web.
+              Al acceder y utilizar el sitio web www.TiendaDelEscanciador.com, aceptas estar vinculado por estos Términos y Condiciones. Si no aceptas alguno de estos términos, no debes acceder ni utilizar el sitio web.
             </p>
           </section>
 

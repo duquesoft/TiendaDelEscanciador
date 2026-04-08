@@ -1,17 +1,27 @@
 "use client";
 import { useEffect, useState } from "react";
 
+function getCartCount() {
+  if (typeof window === "undefined") {
+    return 0;
+  }
+
+  try {
+    const carrito = JSON.parse(localStorage.getItem("carrito") || "[]");
+    return Array.isArray(carrito) ? carrito.length : 0;
+  } catch {
+    return 0;
+  }
+}
+
 export default function CartIcon() {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(getCartCount);
 
   const actualizar = () => {
-    const carrito = JSON.parse(localStorage.getItem("carrito") || "[]");
-    setCount(carrito.length);
+    setCount(getCartCount());
   };
 
   useEffect(() => {
-    actualizar();
-
     window.addEventListener("carrito-actualizado", actualizar);
     window.addEventListener("storage", actualizar);
 

@@ -38,7 +38,6 @@ export function parseShippingDetails(input: {
   name?: string | null
   lastname?: string | null
 }): ShippingDetails {
-  const fallbackName = [input.name || '', input.lastname || ''].join(' ').trim()
   const fallbackPhone = input.phone || ''
   const address = input.address || ''
 

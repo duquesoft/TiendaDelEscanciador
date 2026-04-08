@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client'
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react'
@@ -380,10 +381,10 @@ export default function AdminProductosPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="max-w-6xl mx-auto p-6">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Gestión de productos</h1>
-          <Link href="/admin/dashboard" className="text-blue-600 hover:text-blue-700">
+      <div className="max-w-6xl mx-auto p-4 md:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Gestión de productos</h1>
+          <Link href="/admin/dashboard" className="text-blue-600 hover:text-blue-700 text-sm md:text-base">
             Volver al dashboard
           </Link>
         </div>
@@ -653,7 +654,7 @@ export default function AdminProductosPage() {
           </div>
             </>
           ) : (
-            <p className="text-sm text-gray-500">Pulsa "Añadir nuevo producto" para abrir el formulario.</p>
+            <p className="text-sm text-gray-500">Pulsa &quot;Añadir nuevo producto&quot; para abrir el formulario.</p>
           )}
 
           {message && (

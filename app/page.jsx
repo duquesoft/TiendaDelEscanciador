@@ -2,22 +2,23 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-// trigger redeploy
+import { useCallback, useEffect, useRef, useState } from "react";
+
+const IMAGENES_IZQUIERDA = [
+  "/img/i1862459534.webp",
+  "/img/i1862459545.webp",
+  "/img/i1862467445.webp",
+];
+
+const IMAGENES_DERECHA = [
+  "/img/i1862486538.webp",
+  "/img/i1862488481.webp",
+  "/img/i1862459534.webp",
+];
+
+const GALERIA_IMAGENES = [...new Set([...IMAGENES_IZQUIERDA, ...IMAGENES_DERECHA])];
 
 export default function Home() {
-  const imagenesIzquierda = [
-    "/img/i1862459534.webp",
-    "/img/i1862459545.webp",
-    "/img/i1862467445.webp",
-  ];
-
-  const imagenesDerecha = [
-    "/img/i1862486538.webp",
-    "/img/i1862488481.webp",
-    "/img/i1862459534.webp",
-  ];
-
   const [indexIzquierda, setIndexIzquierda] = useState(0);
   const [indexDerecha, setIndexDerecha] = useState(0);
 
@@ -31,38 +32,37 @@ export default function Home() {
   const [debeCargarVideo, setDebeCargarVideo] = useState(false);
   const [esMovil, setEsMovil] = useState(null);
   const videoSectionRef = useRef(null);
-  const totalImagenesIzquierda = imagenesIzquierda.length;
-  const totalImagenesDerecha = imagenesDerecha.length;
-  const galeriaImagenes = [...new Set([...imagenesIzquierda, ...imagenesDerecha])];
+  const totalImagenesIzquierda = IMAGENES_IZQUIERDA.length;
+  const totalImagenesDerecha = IMAGENES_DERECHA.length;
 
   const setPremiumPlaybackRate = (event) => {
     event.currentTarget.playbackRate = 0.95;
   };
 
   const abrirImagenAmpliada = (src) => {
-    const indice = galeriaImagenes.indexOf(src);
+    const indice = GALERIA_IMAGENES.indexOf(src);
     if (indice !== -1) {
       setIndiceImagenAmpliada(indice);
     }
   };
 
-  const cerrarImagenAmpliada = () => {
+  const cerrarImagenAmpliada = useCallback(() => {
     setIndiceImagenAmpliada(null);
-  };
+  }, []);
 
-  const mostrarAnteriorImagen = () => {
+  const mostrarAnteriorImagen = useCallback(() => {
     setIndiceImagenAmpliada((prev) => {
       if (prev === null) return prev;
-      return (prev - 1 + galeriaImagenes.length) % galeriaImagenes.length;
+      return (prev - 1 + GALERIA_IMAGENES.length) % GALERIA_IMAGENES.length;
     });
-  };
+  }, []);
 
-  const mostrarSiguienteImagen = () => {
+  const mostrarSiguienteImagen = useCallback(() => {
     setIndiceImagenAmpliada((prev) => {
       if (prev === null) return prev;
-      return (prev + 1) % galeriaImagenes.length;
+      return (prev + 1) % GALERIA_IMAGENES.length;
     });
-  };
+  }, []);
 
   const manejarInicioToque = (event) => {
     setInicioToqueX(event.touches[0].clientX);
@@ -135,7 +135,7 @@ export default function Home() {
       document.body.style.overflow = "";
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [indiceImagenAmpliada]);
+  }, [cerrarImagenAmpliada, indiceImagenAmpliada, mostrarAnteriorImagen, mostrarSiguienteImagen]);
 
   useEffect(() => {
     const target = videoSectionRef.current;
@@ -217,7 +217,7 @@ export default function Home() {
           {/* Imagen izquierda */}
           <div className="w-1/3 h-[520px] rounded-xl overflow-hidden relative border border-slate-300/60 bg-white/40 shadow-[0_8px_20px_rgba(15,23,42,0.08)]">
             <Image
-              src={imagenesIzquierda[indexIzquierda]}
+              src={IMAGENES_IZQUIERDA[indexIzquierda]}
               alt="Fondo desenfocado del producto"
               fill
               sizes="(max-width: 767px) 50vw, 33vw"
@@ -227,12 +227,12 @@ export default function Home() {
             />
 
             <img
-              src={imagenesIzquierda[indexIzquierda]}
+              src={IMAGENES_IZQUIERDA[indexIzquierda]}
               onMouseEnter={() => setPausadoIzquierda(true)}
               onMouseLeave={() => setPausadoIzquierda(false)}
               onTouchStart={() => setPausadoIzquierda(true)}
               onTouchEnd={() => setPausadoIzquierda(false)}
-              onClick={() => abrirImagenAmpliada(imagenesIzquierda[indexIzquierda])}
+              onClick={() => abrirImagenAmpliada(IMAGENES_IZQUIERDA[indexIzquierda])}
               className={`absolute inset-0 w-full h-full object-contain rounded-xl transition-[opacity,transform] duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
                 fadeIzquierda ? "opacity-100 scale-100 translate-y-0" : "opacity-20 scale-[1.025] translate-y-[2px]"
               }`}
@@ -267,7 +267,7 @@ export default function Home() {
           {/* Imagen derecha */}
           <div className="w-1/3 h-[520px] rounded-xl overflow-hidden relative border border-slate-300/60 bg-white/40 shadow-[0_8px_20px_rgba(15,23,42,0.08)]">
             <Image
-              src={imagenesDerecha[indexDerecha]}
+              src={IMAGENES_DERECHA[indexDerecha]}
               alt="Fondo desenfocado del producto"
               fill
               sizes="(max-width: 767px) 50vw, 33vw"
@@ -277,12 +277,12 @@ export default function Home() {
             />
 
             <img
-              src={imagenesDerecha[indexDerecha]}
+              src={IMAGENES_DERECHA[indexDerecha]}
               onMouseEnter={() => setPausadoDerecha(true)}
               onMouseLeave={() => setPausadoDerecha(false)}
               onTouchStart={() => setPausadoDerecha(true)}
               onTouchEnd={() => setPausadoDerecha(false)}
-              onClick={() => abrirImagenAmpliada(imagenesDerecha[indexDerecha])}
+              onClick={() => abrirImagenAmpliada(IMAGENES_DERECHA[indexDerecha])}
               className={`absolute inset-0 w-full h-full object-contain rounded-xl transition-[opacity,transform] duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
                 fadeDerecha ? "opacity-100 scale-100 translate-y-0" : "opacity-20 scale-[1.025] translate-y-[2px]"
               }`}
@@ -334,7 +334,7 @@ export default function Home() {
             <div className="w-1/2 rounded-xl overflow-hidden h-[270px] relative border border-slate-300/60 bg-white/40 shadow-[0_8px_20px_rgba(15,23,42,0.08)]">
 
               <Image
-                src={imagenesIzquierda[indexIzquierda]}
+                src={IMAGENES_IZQUIERDA[indexIzquierda]}
                 alt="Fondo desenfocado del producto"
                 fill
                 sizes="(max-width: 767px) 50vw, 33vw"
@@ -344,12 +344,12 @@ export default function Home() {
               />
 
               <img
-                src={imagenesIzquierda[indexIzquierda]}
+                src={IMAGENES_IZQUIERDA[indexIzquierda]}
                 onMouseEnter={() => setPausadoIzquierda(true)}
                 onMouseLeave={() => setPausadoIzquierda(false)}
                 onTouchStart={() => setPausadoIzquierda(true)}
                 onTouchEnd={() => setPausadoIzquierda(false)}
-                onClick={() => abrirImagenAmpliada(imagenesIzquierda[indexIzquierda])}
+                onClick={() => abrirImagenAmpliada(IMAGENES_IZQUIERDA[indexIzquierda])}
                 className={`absolute inset-0 w-full h-full object-contain rounded-xl transition-[opacity,transform] duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
                   fadeIzquierda ? "opacity-100 scale-100 translate-y-0" : "opacity-20 scale-[1.025] translate-y-[2px]"
                 }`}
@@ -363,7 +363,7 @@ export default function Home() {
             <div className="w-1/2 rounded-xl overflow-hidden h-[270px] relative border border-slate-300/60 bg-white/40 shadow-[0_8px_20px_rgba(15,23,42,0.08)]">
 
               <Image
-                src={imagenesDerecha[indexDerecha]}
+                src={IMAGENES_DERECHA[indexDerecha]}
                 alt="Fondo desenfocado del producto"
                 fill
                 sizes="(max-width: 767px) 50vw, 33vw"
@@ -373,12 +373,12 @@ export default function Home() {
               />
 
               <img
-                src={imagenesDerecha[indexDerecha]}
+                src={IMAGENES_DERECHA[indexDerecha]}
                 onMouseEnter={() => setPausadoDerecha(true)}
                 onMouseLeave={() => setPausadoDerecha(false)}
                 onTouchStart={() => setPausadoDerecha(true)}
                 onTouchEnd={() => setPausadoDerecha(false)}
-                onClick={() => abrirImagenAmpliada(imagenesDerecha[indexDerecha])}
+                onClick={() => abrirImagenAmpliada(IMAGENES_DERECHA[indexDerecha])}
                 className={`absolute inset-0 w-full h-full object-contain rounded-xl transition-[opacity,transform] duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
                   fadeDerecha ? "opacity-100 scale-100 translate-y-0" : "opacity-20 scale-[1.025] translate-y-[2px]"
                 }`}
@@ -471,7 +471,7 @@ export default function Home() {
             onTouchEnd={manejarFinToque}
           >
             <img
-              src={galeriaImagenes[indiceImagenAmpliada]}
+                src={GALERIA_IMAGENES[indiceImagenAmpliada]}
               alt="Imagen ampliada del escanciador"
               className="w-full h-full max-h-[90vh] object-contain rounded-2xl bg-white/5"
             />

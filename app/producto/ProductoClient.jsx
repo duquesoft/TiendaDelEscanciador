@@ -1,16 +1,15 @@
-/* eslint-disable @next/next/no-img-element */
+﻿/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import ProductDescription from "@/app/components/ProductDescription";
 import PaymentMethods from "@/app/components/PaymentMethods";
 
 export default function ProductoClient({ initialProducts }) {
-  const products = Array.isArray(initialProducts) ? initialProducts : [];
+  const products = useMemo(() => (Array.isArray(initialProducts) ? initialProducts : []), [initialProducts]);
   const [selectedProductId, setSelectedProductId] = useState(products[0]?.id || "");
-  const [imagenPrincipal, setImagenPrincipal] = useState(products[0]?.imageUrl || "");
-  const [imagenEnTransicion, setImagenEnTransicion] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(products[0]?.imageUrl || "");
 
   const productoSeleccionado = useMemo(() => {
     return products.find((product) => product.id === selectedProductId) || products[0] || null;
@@ -29,20 +28,17 @@ export default function ProductoClient({ initialProducts }) {
     return [productoSeleccionado.imageUrl];
   }, [productoSeleccionado]);
 
-  useEffect(() => {
-    if (productoSeleccionado?.imageUrl) {
-      setImagenPrincipal(productoSeleccionado.imageUrl);
+  const imagenPrincipal = useMemo(() => {
+    if (!productoSeleccionado) {
+      return "";
     }
-  }, [productoSeleccionado]);
 
-  useEffect(() => {
-    if (!imagenPrincipal) return;
+    if (selectedImage && imagenes.includes(selectedImage)) {
+      return selectedImage;
+    }
 
-    setImagenEnTransicion(true);
-    const timeout = setTimeout(() => setImagenEnTransicion(false), 180);
-
-    return () => clearTimeout(timeout);
-  }, [imagenPrincipal]);
+    return productoSeleccionado.imageUrl || imagenes[0] || "";
+  }, [imagenes, productoSeleccionado, selectedImage]);
 
   const añadirAlCarrito = () => {
     if (!productoSeleccionado) {
@@ -103,9 +99,7 @@ export default function ProductoClient({ initialProducts }) {
                 <div className="relative h-[320px] overflow-hidden rounded-lg bg-slate-100 lg:h-[550px]">
                   <img
                     src={imagenPrincipal}
-                    className={`h-full w-full object-contain drop-shadow-[0_8px_18px_rgba(15,23,42,0.16)] transition-opacity duration-200 ease-out ${
-                      imagenEnTransicion ? "opacity-85" : "opacity-100"
-                    }`}
+                    className="h-full w-full object-contain drop-shadow-[0_8px_18px_rgba(15,23,42,0.16)] transition-opacity duration-200 ease-out opacity-100"
                     alt={productoSeleccionado.name}
                   />
                 </div>
@@ -116,7 +110,7 @@ export default function ProductoClient({ initialProducts }) {
                   <img
                     key={`${productoSeleccionado.id}-${index}`}
                     src={img}
-                    onClick={() => setImagenPrincipal(img)}
+                    onClick={() => setSelectedImage(img)}
                     className={`w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg cursor-pointer border-2 transition
                       ${imagenPrincipal === img ? "border-green-600" : "border-gray-300"}
                     `}

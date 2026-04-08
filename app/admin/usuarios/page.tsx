@@ -123,10 +123,10 @@ export default function AdminUsersPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Gestión de Usuarios</h1>
-          <Link href="/admin/dashboard" className="text-blue-600 hover:text-blue-700">
+      <div className="max-w-7xl mx-auto p-4 md:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Gestión de Usuarios</h1>
+          <Link href="/admin/dashboard" className="text-blue-600 hover:text-blue-700 text-sm md:text-base">
             Volver al dashboard
           </Link>
         </div>
@@ -254,7 +254,7 @@ export default function AdminUsersPage() {
                                       ? 'bg-yellow-100 text-yellow-800'
                                       : order.status === 'paid'
                                       ? 'bg-blue-100 text-blue-800'
-                                      : order.status === 'completed'
+                                      : order.status === 'shipped' || order.status === 'completed'
                                       ? 'bg-green-100 text-green-800'
                                       : 'bg-red-100 text-red-800'
                                   }`}
@@ -263,8 +263,8 @@ export default function AdminUsersPage() {
                                     ? 'Pendiente'
                                     : order.status === 'paid'
                                     ? 'Pago completado'
-                                    : order.status === 'completed'
-                                    ? 'Completado'
+                                    : order.status === 'shipped' || order.status === 'completed'
+                                    ? 'Enviado'
                                     : 'Cancelado'}
                                 </span>
                               </td>

@@ -6,7 +6,6 @@ import {
   formatShippingAddress,
   parseShippingDetails,
   serializeShippingDetails,
-  formatShippingRecipient,
   type ShippingDetails,
 } from '@/lib/shipping'
 

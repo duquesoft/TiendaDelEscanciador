@@ -37,13 +37,15 @@ interface UserData {
 const statusLabel: Record<string, string> = {
   pending: 'Pendiente',
   paid: 'Pago completado',
-  completed: 'Completado',
+  shipped: 'Enviado',
+  completed: 'Enviado',
   cancelled: 'Cancelado',
 }
 
 const statusColor: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
   paid: 'bg-blue-100 text-blue-800',
+  shipped: 'bg-green-100 text-green-800',
   completed: 'bg-green-100 text-green-800',
   cancelled: 'bg-red-100 text-red-800',
 }
@@ -128,23 +130,23 @@ export default function UserDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="max-w-5xl mx-auto p-6">
+      <div className="max-w-5xl mx-auto p-4 md:p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-wrap items-start justify-between gap-3 mb-6 md:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Detalle del Usuario</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Detalle del Usuario</h1>
             <p className="text-sm text-gray-500 mt-1">{user.email}</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-2 md:gap-3">
             <Link
               href="/admin/dashboard"
-              className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              className="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
             >
               Volver al dashboard
             </Link>
             <Link
               href={`/admin/usuarios/${id}/editar`}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="px-3 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
               Editar usuario
             </Link>

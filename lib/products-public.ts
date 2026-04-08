@@ -11,7 +11,7 @@ export async function getPublicProducts(): Promise<ProductRecord[]> {
 
     const { data, error } = await supabaseAdmin
       .from('products')
-      .select('id, name, description, price, image_url, gallery, is_active, sort_order, created_at, updated_at')
+      .select('*')
       .eq('is_active', true)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })

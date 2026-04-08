@@ -23,6 +23,12 @@ function isMetaMaskExtensionStack(stack: unknown) {
 
 export default function IgnoreExtensionErrors() {
   useEffect(() => {
+    const swallow = (event: Event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation?.();
+      event.stopPropagation();
+    };
+
     const onError = (event: ErrorEvent) => {
       const extensionSource = typeof event.filename === "string" &&
         event.filename.includes(`chrome-extension://${METAMASK_EXTENSION_ID}`);
@@ -32,7 +38,7 @@ export default function IgnoreExtensionErrors() {
         isMetaMaskExtensionErrorMessage(event.message) ||
         isMetaMaskExtensionStack(event.error?.stack)
       ) {
-        event.preventDefault();
+        swallow(event);
       }
     };
 
@@ -50,16 +56,16 @@ export default function IgnoreExtensionErrors() {
         isMetaMaskExtensionErrorMessage(reasonMessage) ||
         isMetaMaskExtensionStack(reasonStack)
       ) {
-        event.preventDefault();
+        swallow(event);
       }
     };
 
-    window.addEventListener("error", onError);
-    window.addEventListener("unhandledrejection", onUnhandledRejection);
+    window.addEventListener("error", onError, true);
+    window.addEventListener("unhandledrejection", onUnhandledRejection, true);
 
     return () => {
-      window.removeEventListener("error", onError);
-      window.removeEventListener("unhandledrejection", onUnhandledRejection);
+      window.removeEventListener("error", onError, true);
+      window.removeEventListener("unhandledrejection", onUnhandledRejection, true);
     };
   }, []);
 

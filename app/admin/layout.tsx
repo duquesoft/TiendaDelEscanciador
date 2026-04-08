@@ -1,15 +1,30 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+
+const navLinks = [
+  { href: '/admin/dashboard', label: 'Dashboard' },
+  { href: '/admin/usuarios', label: 'Usuarios' },
+  { href: '/admin/pedidos', label: 'Pedidos' },
+  { href: '/admin/productos', label: 'Productos' },
+  { href: '/admin/reportes', label: 'Reportes' },
+  { href: '/admin/configuracion', label: 'Configuración' },
+]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const router = useRouter()
+  const pathname = usePathname()
   const supabase = createClient()
+
+  useEffect(() => {
+    setSidebarOpen(false)
+  }, [pathname])
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -65,50 +80,61 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Sidebar Navigation */}
+      {/* Top bar móvil */}
+      <div className="lg:hidden flex items-center justify-between bg-gray-900 text-white px-4 py-3">
+        <Link href="/admin/dashboard" className="text-lg font-bold">
+          Admin Panel
+        </Link>
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="p-2 rounded-md hover:bg-gray-700 transition"
+          aria-label="Abrir menú"
+        >
+          {sidebarOpen ? (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
+        </button>
+      </div>
+
+      {/* Overlay en móvil */}
+      {sidebarOpen && (
+        <div
+          className="lg:hidden fixed inset-0 z-20 bg-black/50"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       <div className="flex">
-        <div className="w-64 bg-gray-900 text-white p-6">
+        {/* Sidebar */}
+        <div
+          className={`
+            fixed top-0 left-0 z-30 h-full w-64 bg-gray-900 text-white p-6 transform transition-transform duration-300
+            lg:static lg:translate-x-0 lg:z-auto lg:min-h-screen
+            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          `}
+        >
           <Link href="/admin/dashboard" className="text-2xl font-bold mb-8 block">
             Admin Panel
           </Link>
 
           <nav className="space-y-4">
-            <Link
-              href="/admin/dashboard"
-              className="block px-4 py-2 rounded-lg hover:bg-gray-800 transition"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/admin/usuarios"
-              className="block px-4 py-2 rounded-lg hover:bg-gray-800 transition"
-            >
-              Usuarios
-            </Link>
-            <Link
-              href="/admin/pedidos"
-              className="block px-4 py-2 rounded-lg hover:bg-gray-800 transition"
-            >
-              Pedidos
-            </Link>
-            <Link
-              href="/admin/productos"
-              className="block px-4 py-2 rounded-lg hover:bg-gray-800 transition"
-            >
-              Productos
-            </Link>
-            <Link
-              href="/admin/reportes"
-              className="block px-4 py-2 rounded-lg hover:bg-gray-800 transition"
-            >
-              Reportes
-            </Link>
-            <Link
-              href="/admin/configuracion"
-              className="block px-4 py-2 rounded-lg hover:bg-gray-800 transition"
-            >
-              Configuración
-            </Link>
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`block px-4 py-2 rounded-lg hover:bg-gray-800 transition ${
+                  pathname === link.href ? 'bg-gray-700' : ''
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
             <hr className="my-4 border-gray-700" />
             <Link
               href="/"
@@ -120,7 +146,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         {/* Content */}
-        <div className="flex-1">{children}</div>
+        <div className="flex-1 min-w-0">{children}</div>
       </div>
     </div>
   )

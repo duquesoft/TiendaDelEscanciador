@@ -1,0 +1,8 @@
+<svg width="176" height="56" viewBox="0 0 176 56" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="mcTitle mcDesc">
+  <title id="mcTitle">Mastercard</title>
+  <desc id="mcDesc">Mastercard logo with overlapping red and orange circles</desc>
+  <rect width="176" height="56" rx="10" fill="white"/>
+  <circle cx="54" cy="28" r="15" fill="#EB001B"/>
+  <circle cx="72" cy="28" r="15" fill="#F79E1B" fill-opacity="0.95"/>
+  <text x="94" y="34" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#4B5563">MASTERCARD</text>
+</svg>

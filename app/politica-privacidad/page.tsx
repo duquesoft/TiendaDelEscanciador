@@ -65,7 +65,7 @@ export default function PoliticaPrivacidadPage() {
               Si tienes preguntas sobre esta Política de Privacidad o tus datos personales, puedes contactarnos en:
             </p>
             <p className="mb-2">
-              <strong>Correo:</strong> duquesoft@gmail.com
+              <strong>Correo:</strong> contacto@tiendadelescanciador.com
             </p>
           </section>
 

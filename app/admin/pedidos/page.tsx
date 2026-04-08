@@ -3,16 +3,14 @@
 import { useState, useEffect } from 'react'
 import { getAllOrders, updateOrderStatus } from '@/lib/supabase/admin'
 import Link from 'next/link'
-import { getOrderProducts } from '@/lib/order-data'
+import { getOrderPaymentMethod, getOrderProducts } from '@/lib/order-data'
+import { getPaymentMethodLabel } from '@/lib/payment-methods'
+import { formatOrderNumber } from '@/lib/order-number'
 
 interface Order {
   id: string
   user_id: string
-  productos?: Array<{
-    nombre: string
-    precio: number
-    cantidad?: number
-  }>
+  productos?: unknown[]
   product?: string
   quantity?: number
   status: string
@@ -65,7 +63,26 @@ export default function OrdersPage() {
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
-      const success = await updateOrderStatus(orderId, newStatus)
+      let shipmentPayload: {
+        carrier: string
+        trackingNumber: string
+        trackingUrl: string
+      } | undefined
+
+      if (newStatus === 'shipped') {
+        const carrier = window.prompt('Agencia de transporte (ej. Correos Express):', '')?.trim() || ''
+        if (!carrier) return
+
+        const trackingNumber = window.prompt('Numero de seguimiento:', '')?.trim() || ''
+        if (!trackingNumber) return
+
+        const trackingUrl = window.prompt('Enlace de seguimiento (https://...):', '')?.trim() || ''
+        if (!trackingUrl) return
+
+        shipmentPayload = { carrier, trackingNumber, trackingUrl }
+      }
+
+      const success = await updateOrderStatus(orderId, newStatus, shipmentPayload)
       if (success) {
         setOrders(orders.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o)))
       }
@@ -86,10 +103,10 @@ export default function OrdersPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Gestión de Pedidos</h1>
-          <Link href="/admin/dashboard" className="text-blue-600 hover:text-blue-700">
+      <div className="max-w-7xl mx-auto p-4 md:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Gestión de Pedidos</h1>
+          <Link href="/admin/dashboard" className="text-blue-600 hover:text-blue-700 text-sm md:text-base">
             Volver al dashboard
           </Link>
         </div>
@@ -102,8 +119,8 @@ export default function OrdersPage() {
 
         {/* Filtros */}
         <div className="bg-white rounded-lg shadow p-4 mb-6">
-          <div className="flex gap-2">
-            {['all', 'pending', 'paid', 'completed', 'cancelled'].map((status) => (
+          <div className="flex flex-wrap gap-2">
+            {['all', 'pending', 'paid', 'shipped', 'cancelled'].map((status) => (
               <button
                 key={status}
                 onClick={() => setFilter(status)}
@@ -119,8 +136,8 @@ export default function OrdersPage() {
                     ? 'Pendientes'
                     : status === 'paid'
                       ? 'Pago completado'
-                      : status === 'completed'
-                        ? 'Completados'
+                      : status === 'shipped'
+                        ? 'Enviados'
                         : 'Cancelados'}
               </button>
             ))}
@@ -136,6 +153,7 @@ export default function OrdersPage() {
                   <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">ID</th>
                   <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Producto</th>
                   <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Cantidad</th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Pago</th>
                   <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Total</th>
                   <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Estado</th>
                   <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Fecha</th>
@@ -146,9 +164,12 @@ export default function OrdersPage() {
                 {filteredOrders.length > 0 ? (
                   filteredOrders.map((order) => (
                     <tr key={order.id} className="border-b border-gray-200 hover:bg-gray-50">
-                      <td className="px-6 py-4 text-sm text-gray-900">{order.id.slice(0, 8)}...</td>
+                      <td className="px-6 py-4 text-sm text-gray-900">{formatOrderNumber(order.id)}</td>
                       <td className="px-6 py-4 text-sm text-gray-900">{getOrderProductSummary(order)}</td>
                       <td className="px-6 py-4 text-sm text-gray-900">{getOrderQuantity(order)}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900">
+                        {getPaymentMethodLabel(getOrderPaymentMethod(order.productos))}
+                      </td>
                       <td className="px-6 py-4 text-sm text-gray-900 font-semibold">€{order.total.toFixed(2)}</td>
                       <td className="px-6 py-4 text-sm">
                         <select
@@ -159,14 +180,14 @@ export default function OrdersPage() {
                               ? 'bg-yellow-100 text-yellow-800'
                               : order.status === 'paid'
                                 ? 'bg-blue-100 text-blue-800'
-                                : order.status === 'completed'
+                                : order.status === 'shipped' || order.status === 'completed'
                                   ? 'bg-green-100 text-green-800'
                                   : 'bg-red-100 text-red-800'
                           }`}
                         >
                           <option value="pending">Pendiente</option>
                           <option value="paid">Pago completado</option>
-                          <option value="completed">Completado</option>
+                          <option value="shipped">Enviado</option>
                           <option value="cancelled">Cancelado</option>
                         </select>
                       </td>
@@ -185,7 +206,7 @@ export default function OrdersPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
                       No hay pedidos con ese estado
                     </td>
                   </tr>

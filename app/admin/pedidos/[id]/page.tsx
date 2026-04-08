@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { getOrderById, updateOrderStatus } from '@/lib/supabase/admin'
 import Link from 'next/link'
-import { getOrderProducts, getOrderShipping } from '@/lib/order-data'
+import { getOrderPaymentMethod, getOrderProducts, getOrderShipping, getOrderShipmentInfo } from '@/lib/order-data'
+import { getPaymentMethodLabel } from '@/lib/payment-methods'
 import type { ShippingDetails } from '@/lib/shipping'
+import { formatOrderNumber } from '@/lib/order-number'
 
 interface OrderProduct {
   nombre: string
@@ -25,6 +27,12 @@ interface Order {
   updated_at?: string
 }
 
+interface ShipmentForm {
+  carrier: string
+  trackingNumber: string
+  trackingUrl: string
+}
+
 export default function OrderDetailPage() {
   const params = useParams()
   const router = useRouter()
@@ -33,6 +41,11 @@ export default function OrderDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [shipmentForm, setShipmentForm] = useState<ShipmentForm>({
+    carrier: '',
+    trackingNumber: '',
+    trackingUrl: '',
+  })
 
   useEffect(() => {
     const loadOrder = async () => {
@@ -53,6 +66,15 @@ export default function OrderDetailPage() {
             setUserShipping(userData.shipping ?? null)
           }
         }
+
+        const shipmentInfo = getOrderShipmentInfo(data.productos)
+        if (shipmentInfo) {
+          setShipmentForm({
+            carrier: shipmentInfo.carrier,
+            trackingNumber: shipmentInfo.trackingNumber,
+            trackingUrl: shipmentInfo.trackingUrl,
+          })
+        }
       } catch (err) {
         setError('Error cargando el pedido')
         console.error(err)
@@ -68,12 +90,27 @@ export default function OrderDetailPage() {
     if (!order) return
     setSaving(true)
     try {
-      const success = await updateOrderStatus(order.id, newStatus)
+      if (newStatus === 'shipped') {
+        const carrier = shipmentForm.carrier.trim()
+        const trackingNumber = shipmentForm.trackingNumber.trim()
+        const trackingUrl = shipmentForm.trackingUrl.trim()
+
+        if (!carrier || !trackingNumber || !trackingUrl) {
+          setError('Para marcar como enviado debes indicar agencia, numero de seguimiento y enlace')
+          return
+        }
+      }
+
+      setError(null)
+      const success = await updateOrderStatus(order.id, newStatus, shipmentForm)
       if (success) {
         setOrder({ ...order, status: newStatus })
+      } else {
+        setError('No se pudo actualizar el estado del pedido')
       }
     } catch (err) {
       console.error('Error updating status:', err)
+      setError('No se pudo actualizar el estado del pedido')
     } finally {
       setSaving(false)
     }
@@ -119,6 +156,8 @@ export default function OrderDetailPage() {
       }
     : null
   const shippingIsFromProfile = !embeddedShipping && !!userShipping
+  const paymentMethod = getOrderPaymentMethod(order.productos)
+  const storedShipment = getOrderShipmentInfo(order.productos)
 
   const formatShippingLine = (parts: Array<string | undefined>) => {
     const values = parts
@@ -131,42 +170,44 @@ export default function OrderDetailPage() {
   const statusLabel: Record<string, string> = {
     pending: 'Pendiente',
     paid: 'Pago completado',
-    completed: 'Completado',
+    shipped: 'Enviado',
+    completed: 'Enviado',
     cancelled: 'Cancelado',
   }
 
   const statusColor: Record<string, string> = {
     pending: 'bg-yellow-100 text-yellow-800',
     paid: 'bg-blue-100 text-blue-800',
+    shipped: 'bg-green-100 text-green-800',
     completed: 'bg-green-100 text-green-800',
     cancelled: 'bg-red-100 text-red-800',
   }
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="max-w-4xl mx-auto p-6">
+      <div className="max-w-4xl mx-auto p-4 md:p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-wrap items-start justify-between gap-3 mb-6 md:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Detalle del Pedido</h1>
-            <p className="text-sm text-gray-500 mt-1">ID: {order.id}</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Detalle del Pedido</h1>
+            <p className="text-sm text-gray-500 mt-1">Pedido: {formatOrderNumber(order.id)}</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-2 md:gap-3">
             <button
               onClick={() => router.back()}
-              className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              className="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
             >
               Volver
             </button>
             <Link
               href={`/admin/usuarios/${order.user_id}`}
-              className="px-4 py-2 text-emerald-700 bg-white border border-emerald-300 rounded-md hover:bg-emerald-50"
+              className="px-3 py-2 text-sm text-emerald-700 bg-white border border-emerald-300 rounded-md hover:bg-emerald-50"
             >
               Ver usuario
             </Link>
             <Link
               href="/admin/pedidos"
-              className="px-4 py-2 text-blue-600 bg-white border border-blue-300 rounded-md hover:bg-blue-50"
+              className="px-3 py-2 text-sm text-blue-600 bg-white border border-blue-300 rounded-md hover:bg-blue-50"
             >
               Todos los pedidos
             </Link>
@@ -197,10 +238,50 @@ export default function OrderDetailPage() {
                 >
                   <option value="pending">Pendiente</option>
                   <option value="paid">Pago completado</option>
-                  <option value="completed">Completado</option>
+                  <option value="shipped">Enviado</option>
                   <option value="cancelled">Cancelado</option>
                 </select>
                 {saving && <p className="text-xs text-gray-500 mt-1">Guardando...</p>}
+              </div>
+              <div className="mt-4 border-t border-gray-100 pt-4 space-y-3">
+                <p className="text-sm font-medium text-gray-700">Datos de envío para cliente</p>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Agencia de transporte</label>
+                  <input
+                    type="text"
+                    value={shipmentForm.carrier}
+                    onChange={(e) => setShipmentForm((prev) => ({ ...prev, carrier: e.target.value }))}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    placeholder="Ej. Correos Express"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Numero de seguimiento</label>
+                  <input
+                    type="text"
+                    value={shipmentForm.trackingNumber}
+                    onChange={(e) => setShipmentForm((prev) => ({ ...prev, trackingNumber: e.target.value }))}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    placeholder="Ej. 123456789ES"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Enlace de seguimiento</label>
+                  <input
+                    type="url"
+                    value={shipmentForm.trackingUrl}
+                    onChange={(e) => setShipmentForm((prev) => ({ ...prev, trackingUrl: e.target.value }))}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    placeholder="https://..."
+                  />
+                </div>
+                <p className="text-xs text-gray-500">
+                  Al cambiar el estado a Enviado se enviará un email transaccional al cliente con estos datos.
+                </p>
+              </div>
+              <div className="mt-4 border-t border-gray-100 pt-4">
+                <p className="text-sm font-medium text-gray-500">Metodo de pago</p>
+                <p className="mt-1 text-sm text-gray-900">{getPaymentMethodLabel(paymentMethod)}</p>
               </div>
             </div>
 
@@ -291,6 +372,30 @@ export default function OrderDetailPage() {
                 <dt className="font-medium text-gray-500">Total</dt>
                 <dd className="text-gray-900 font-bold mt-0.5">€{order.total.toFixed(2)}</dd>
               </div>
+              <div>
+                <dt className="font-medium text-gray-500">Metodo de pago</dt>
+                <dd className="text-gray-900 mt-0.5">{getPaymentMethodLabel(paymentMethod)}</dd>
+              </div>
+              {storedShipment && (
+                <>
+                  <div>
+                    <dt className="font-medium text-gray-500">Agencia de transporte</dt>
+                    <dd className="text-gray-900 mt-0.5">{storedShipment.carrier}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-medium text-gray-500">Numero de seguimiento</dt>
+                    <dd className="text-gray-900 mt-0.5">{storedShipment.trackingNumber}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-medium text-gray-500">Seguimiento</dt>
+                    <dd className="text-gray-900 mt-0.5 break-all">
+                      <a href={storedShipment.trackingUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                        {storedShipment.trackingUrl}
+                      </a>
+                    </dd>
+                  </div>
+                </>
+              )}
             </dl>
           </div>
 
