@@ -239,28 +239,38 @@ export default function AdminUsersPage() {
                       {/* Móvil: tarjetas */}
                       <div className="md:hidden divide-y divide-gray-200">
                         {userOrders.map((order) => (
-                          <div key={order.id} className="p-4 space-y-1">
-                            <p className="text-sm font-medium text-gray-900">{getOrderProductSummary(order)}</p>
-                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
-                              <span>Cant: {getOrderQuantity(order)}</span>
-                              <span className="font-semibold text-gray-800">€{order.total.toFixed(2)}</span>
+                          <div key={order.id} className="p-4 space-y-3">
+                            <div className="flex items-start justify-between gap-3">
+                              <p className="text-sm font-medium leading-5 text-gray-900">
+                                {getOrderProductSummary(order)}
+                              </p>
+                              <span
+                                className={`shrink-0 inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                                  order.status === 'pending'
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : order.status === 'paid'
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : order.status === 'shipped' || order.status === 'completed'
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-red-100 text-red-800'
+                                }`}
+                              >
+                                {order.status === 'pending' ? 'Pendiente'
+                                  : order.status === 'paid' ? 'Pago completado'
+                                  : order.status === 'shipped' || order.status === 'completed' ? 'Enviado'
+                                  : 'Cancelado'}
+                              </span>
                             </div>
-                            <span
-                              className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
-                                order.status === 'pending'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : order.status === 'paid'
-                                  ? 'bg-blue-100 text-blue-800'
-                                  : order.status === 'shipped' || order.status === 'completed'
-                                  ? 'bg-green-100 text-green-800'
-                                  : 'bg-red-100 text-red-800'
-                              }`}
-                            >
-                              {order.status === 'pending' ? 'Pendiente'
-                                : order.status === 'paid' ? 'Pago completado'
-                                : order.status === 'shipped' || order.status === 'completed' ? 'Enviado'
-                                : 'Cancelado'}
-                            </span>
+                            <div className="grid grid-cols-2 gap-3 text-xs">
+                              <div>
+                                <p className="text-gray-400">Cantidad</p>
+                                <p className="font-medium text-gray-800">{getOrderQuantity(order)}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-gray-400">Total</p>
+                                <p className="font-semibold text-gray-900">€{order.total.toFixed(2)}</p>
+                              </div>
+                            </div>
                           </div>
                         ))}
                       </div>

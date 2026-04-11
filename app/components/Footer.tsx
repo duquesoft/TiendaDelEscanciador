@@ -118,7 +118,7 @@ export default function Footer({ initialWhatsappNumber = '' }: FooterProps) {
                     <path d="m4 8 8 6 8-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </span>
-                <a href="mailto:contacto@tiendadelescanciador.com" className="text-gray-400 hover:text-white transition">
+                <a href="mailto:contacto@tiendadelescanciador.com" className="text-gray-400 hover:text-white transition break-all">
                   contacto@tiendadelescanciador.com
                 </a>
               </li>
