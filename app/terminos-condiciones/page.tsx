@@ -1,3 +1,4 @@
+import React from "react";
 export default function TerminosCondicionesPage() {
   return (
     <main className="flex justify-center items-start min-h-[60vh] py-10 px-2 bg-transparent">
