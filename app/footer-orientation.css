@@ -1,0 +1,39 @@
+@media (orientation: landscape) and (max-width: 1023px) {
+  .footer-company-info-portrait {
+    display: none !important;
+  }
+  .footer-company-info-landscape {
+    display: block !important;
+  }
+  /* Layout: first row = legal/links/contact (three equal columns); second row = company info
+     Use CSS Grid to guarantee a single row for the three blocks and full-width company info below. */
+  .footer-main-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: auto;
+    gap: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .footer-legal,
+  .footer-links,
+  .footer-contact {
+    grid-row: 1;
+    box-sizing: border-box;
+    padding: 0;
+  }
+  .footer-company-info-landscape {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    box-sizing: border-box;
+    margin-top: 0.5rem;
+  }
+}
+@media (orientation: portrait), (min-width: 1024px) {
+  .footer-company-info-portrait {
+    display: block !important;
+  }
+  .footer-company-info-landscape {
+    display: none !important;
+  }
+}

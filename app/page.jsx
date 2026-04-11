@@ -215,7 +215,7 @@ export default function Home() {
         <div className="hidden md:flex w-full items-center justify-center gap-16">
 
           {/* Imagen izquierda */}
-          <div className="w-1/3 h-[520px] rounded-xl overflow-hidden relative border border-slate-300/60 bg-white/40 shadow-[0_8px_20px_rgba(15,23,42,0.08)]">
+          <div className="w-1/3 h-[520px] rounded-xl overflow-hidden relative border border-slate-300/60 bg-white/40 shadow-2xl shadow-black/40">
             <Image
               src={IMAGENES_IZQUIERDA[indexIzquierda]}
               alt="Fondo desenfocado del producto"
@@ -243,7 +243,7 @@ export default function Home() {
           </div>
 
           {/* VIDEO */}
-          <div className="w-1/3 h-[520px] rounded-xl overflow-hidden relative border border-slate-300/60 bg-white/40 shadow-[0_8px_20px_rgba(15,23,42,0.08)]">
+          <div className="w-1/3 h-[520px] rounded-xl overflow-hidden relative border border-slate-300/60 bg-white/40 shadow-2xl shadow-black/40">
             <video
               autoPlay
               loop
@@ -265,7 +265,7 @@ export default function Home() {
           </div>
 
           {/* Imagen derecha */}
-          <div className="w-1/3 h-[520px] rounded-xl overflow-hidden relative border border-slate-300/60 bg-white/40 shadow-[0_8px_20px_rgba(15,23,42,0.08)]">
+          <div className="w-1/3 h-[520px] rounded-xl overflow-hidden relative border border-slate-300/60 bg-white/40 shadow-2xl shadow-black/40">
             <Image
               src={IMAGENES_DERECHA[indexDerecha]}
               alt="Fondo desenfocado del producto"
@@ -298,7 +298,7 @@ export default function Home() {
         <div className="md:hidden w-full flex flex-col items-center gap-0.5">
 
           {/* VIDEO */}
-          <div className="w-full rounded-xl overflow-hidden h-[560px] flex items-center justify-center mb-6 relative border border-slate-300/60 bg-white/40 shadow-[0_8px_20px_rgba(15,23,42,0.08)]">
+          <div className="w-full rounded-xl overflow-hidden h-[560px] flex items-center justify-center mb-6 relative border border-slate-300/60 bg-white/40 shadow-2xl shadow-black/40">
             <video
               autoPlay
               loop
@@ -321,8 +321,9 @@ export default function Home() {
 
           {/* BLOQUE AUTOMÁTICO (MÓVIL) */}
           <div className="w-full p-6 rounded-xl text-center 
-                          bg-gradient-to-b from-black/10 via-black/5 to-black/10
-                          shadow-lg shadow-black/20">
+                          bg-gradient-to-b from-white/60 via-gray-100/60 to-gray-200/60
+                          backdrop-blur-md border border-white/60
+                          shadow-2xl shadow-black/30">
             <div className="text-3xl mb-3" aria-hidden="true">⚡</div>
           <h2 className="text-xl font-semibold mb-2">Automático</h2>
             <p>Sirve la sidra con solo pulsar un botón.</p>
@@ -331,7 +332,7 @@ export default function Home() {
           <div className="flex w-full gap-0.5 mt-6">
 
             {/* Imagen izquierda móvil */}
-            <div className="w-1/2 rounded-xl overflow-hidden h-[270px] relative border border-slate-300/60 bg-white/40 shadow-[0_8px_20px_rgba(15,23,42,0.08)]">
+            <div className="w-1/2 rounded-xl overflow-hidden h-[270px] relative border border-slate-300/60 bg-white/40 shadow-2xl shadow-black/40">
 
               <Image
                 src={IMAGENES_IZQUIERDA[indexIzquierda]}
@@ -360,7 +361,7 @@ export default function Home() {
             </div>
 
             {/* Imagen derecha móvil */}
-            <div className="w-1/2 rounded-xl overflow-hidden h-[270px] relative border border-slate-300/60 bg-white/40 shadow-[0_8px_20px_rgba(15,23,42,0.08)]">
+            <div className="w-1/2 rounded-xl overflow-hidden h-[270px] relative border border-slate-300/60 bg-white/40 shadow-2xl shadow-black/40">
 
               <Image
                 src={IMAGENES_DERECHA[indexDerecha]}
@@ -399,8 +400,9 @@ export default function Home() {
 
         {/* Automático — SOLO PC */}
         <div className="p-6 rounded-xl text-center hidden md:block
-                        bg-gradient-to-b from-black/10 via-black/5 to-black/10
-                        shadow-lg shadow-black/20">
+            bg-gradient-to-b from-white/60 via-gray-100/60 to-gray-200/60
+            backdrop-blur-md border border-white/60
+            shadow-2xl shadow-black/30">
           <div className="text-3xl mb-3" aria-hidden="true">⚡</div>
           <h2 className="text-xl font-semibold mb-2">Automático</h2>
           <p>Sirve la sidra con solo pulsar un botón.</p>
@@ -408,8 +410,9 @@ export default function Home() {
 
         {/* A batería */}
         <div className="p-6 rounded-xl text-center 
-                        bg-gradient-to-b from-black/10 via-black/5 to-black/10
-                        shadow-lg shadow-black/20">
+            bg-gradient-to-b from-white/60 via-gray-100/60 to-gray-200/60
+            backdrop-blur-md border border-white/60
+            shadow-2xl shadow-black/30">
           <div className="text-3xl mb-3" aria-hidden="true">🔋</div>
           <h2 className="text-xl font-semibold mb-2">A batería</h2>
           <p>Autonomía perfecta para reuniones y eventos.</p>
@@ -417,8 +420,9 @@ export default function Home() {
 
         {/* Diseño elegante */}
         <div className="p-6 rounded-xl text-center 
-                        bg-gradient-to-b from-black/10 via-black/5 to-black/10
-                        shadow-lg shadow-black/20">
+            bg-gradient-to-b from-white/60 via-gray-100/60 to-gray-200/60
+            backdrop-blur-md border border-white/60
+            shadow-2xl shadow-black/30">
           <div className="text-3xl mb-3" aria-hidden="true">✨</div>
           <h2 className="text-xl font-semibold mb-2">Diseño elegante</h2>
           <p>Acabado moderno en acero y madera.</p>

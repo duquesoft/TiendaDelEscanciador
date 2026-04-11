@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import '../footer-orientation.css'
 import { useEffect, useState } from 'react'
 import { openCookiePreferences } from '@/lib/cookie-consent'
 import { formatWhatsappDisplay, subscribeWhatsappContactUpdated } from '@/lib/whatsapp-contact'
@@ -24,15 +25,22 @@ export default function Footer({ initialWhatsappNumber = '' }: FooterProps) {
     <footer className="bg-gray-900 text-gray-300">
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          {/* Company Info */}
-          <div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 footer-main-grid">
+          {/* Company Info: visible solo en portrait y desktop */}
+          <div className="footer-company-info-portrait">
             <h3 className="text-white font-bold text-lg mb-4">www.TiendaDelEscanciador.com</h3>
             <p className="text-sm text-gray-400">Venta online de escanciadores de sidra automáticos de calidad.</p>
           </div>
+        {/* Company Info: visible solo en landscape móvil */}
+        <div className="footer-company-info-landscape mb-8">
+          <div className="text-center">
+            <h3 className="text-white font-bold text-lg mb-4">www.TiendaDelEscanciador.com</h3>
+            <p className="text-sm text-gray-400">Venta online de escanciadores de sidra automáticos de calidad.</p>
+          </div>
+        </div>
 
           {/* Legal Links */}
-          <div>
+          <div className="footer-legal">
             <h4 className="text-white font-semibold mb-4">Legal</h4>
             <ul className="space-y-2">
               <li>
@@ -48,6 +56,11 @@ export default function Footer({ initialWhatsappNumber = '' }: FooterProps) {
               <li>
                 <Link href="/politica-cookies" className="text-gray-400 hover:text-white transition">
                   Política de Cookies
+                </Link>
+              </li>
+              <li>
+                <Link href="/politica-devoluciones" className="text-gray-400 hover:text-white transition">
+                  Política de Devoluciones
                 </Link>
               </li>
               <li>
@@ -68,7 +81,7 @@ export default function Footer({ initialWhatsappNumber = '' }: FooterProps) {
           </div>
 
           {/* Quick Links */}
-          <div>
+          <div className="footer-links">
             <h4 className="text-white font-semibold mb-4">Enlaces</h4>
             <ul className="space-y-2">
               <li>
@@ -95,7 +108,7 @@ export default function Footer({ initialWhatsappNumber = '' }: FooterProps) {
           </div>
 
           {/* Contact */}
-          <div>
+          <div className="footer-contact">
             <h4 className="text-white font-semibold mb-4">Contacto</h4>
             <ul className="space-y-2 text-sm">
               <li className="flex items-start">
