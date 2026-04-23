@@ -1,12 +1,16 @@
 'use client'
 
 import { useState } from 'react'
+import { createClient as createSupabaseClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { emptyShippingDetails } from '@/lib/shipping'
 
 export default function SignupPage() {
   const router = useRouter()
+  // Leer parámetro redirect de la URL
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+  const redirect = searchParams?.get('redirect') || null
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -42,7 +46,28 @@ export default function SignupPage() {
     setLoading(true)
     setError(null)
 
-    // Validaciones
+    // Validaciones de campos obligatorios
+    const requiredFields = [
+      { value: formData.email, label: 'Correo electrónico' },
+      { value: formData.password, label: 'Contraseña' },
+      { value: formData.confirmPassword, label: 'Confirmar contraseña' },
+      { value: formData.name, label: 'Nombre' },
+      { value: formData.lastname, label: 'Apellidos' },
+      { value: formData.shipping.addressLine1, label: 'Dirección línea 1' },
+      { value: formData.shipping.postalCode, label: 'Código Postal' },
+      { value: formData.shipping.city, label: 'Ciudad' },
+      { value: formData.shipping.province, label: 'Provincia' },
+      { value: formData.shipping.country, label: 'País' },
+      { value: formData.shipping.nif, label: 'NIF' },
+      { value: formData.shipping.phone, label: 'Teléfono' },
+    ]
+    const missing = requiredFields.find(f => !f.value || f.value.trim() === '')
+    if (missing) {
+      setError(`El campo "${missing.label}" es obligatorio.`)
+      setLoading(false)
+      return
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError('Las contraseñas no coinciden')
       setLoading(false)
@@ -80,8 +105,22 @@ export default function SignupPage() {
         return
       }
 
-      // Usuario creado correctamente → redirigir
-      router.push('/login?message=Account created')
+      // Usuario creado correctamente → login automático con Supabase
+      const supabase = createSupabaseClient()
+      const { error: loginError } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      })
+      if (loginError) {
+        setError('Cuenta creada, pero error al iniciar sesión automáticamente.')
+        return
+      }
+      // Redirigir a página de éxito, pasando redirect si existe
+      if (redirect) {
+        router.push(`/cuenta-creada?redirect=${encodeURIComponent(redirect)}`)
+      } else {
+        router.push('/cuenta-creada')
+      }
     } catch {
       setError('Error al crear la cuenta')
     } finally {
@@ -99,12 +138,6 @@ export default function SignupPage() {
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSignup}>
-          {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <p className="text-sm font-medium text-red-800">{error}</p>
-            </div>
-          )}
-
           <div className="rounded-md shadow-sm space-y-4">
             <input
               id="email"
@@ -258,6 +291,13 @@ export default function SignupPage() {
               onChange={handleChange}
             />
           </div>
+
+
+          {error && (
+            <div className="rounded-md bg-red-50 p-4 mb-2">
+              <p className="text-sm font-medium text-red-800">{error}</p>
+            </div>
+          )}
 
           <button
             type="submit"

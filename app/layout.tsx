@@ -199,7 +199,7 @@ export default async function RootLayout({
       lang="es"
       className={`${geist.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-screen flex flex-col">
+      <body className={`min-h-screen flex flex-col${typeof window !== 'undefined' && (window.location.pathname.startsWith('/carrito') || window.location.pathname.startsWith('/checkout')) ? ' no-leaves-bg' : ''}`}>
         <script
           dangerouslySetInnerHTML={{
             __html: IGNORE_EXTENSION_ERRORS_SCRIPT.replace(/</g, "\\u003c"),

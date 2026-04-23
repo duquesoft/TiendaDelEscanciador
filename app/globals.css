@@ -46,6 +46,8 @@ body::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
+}
+body:not(.no-leaves-bg)::before {
   background: url('/leaves-bg.avif') repeat top left;
   background-image: image-set(
     url('/leaves-bg.avif') type('image/avif'),
@@ -58,7 +60,7 @@ body::before {
 }
 
 @media (orientation: landscape) {
-  body::before {
+  body:not(.no-leaves-bg)::before {
     background: url('/leaves-bg2.avif') repeat top left;
     background-image: image-set(
       url('/leaves-bg2.avif') type('image/avif'),

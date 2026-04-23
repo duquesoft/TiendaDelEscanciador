@@ -1,12 +1,15 @@
 ﻿/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import ProductDescription from "@/app/components/ProductDescription";
 import PaymentMethods from "@/app/components/PaymentMethods";
 
 export default function ProductoClient({ initialProducts }) {
+  useEffect(() => {
+    document.body.classList.remove("no-leaves-bg");
+  }, []);
   const products = useMemo(() => (Array.isArray(initialProducts) ? initialProducts : []), [initialProducts]);
   const [selectedProductId, setSelectedProductId] = useState(products[0]?.id || "");
   const [selectedImage, setSelectedImage] = useState(products[0]?.imageUrl || "");
@@ -61,8 +64,8 @@ export default function ProductoClient({ initialProducts }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-300 via-gray-100 to-white text-gray-900">
-      <div className="max-w-5xl mx-auto p-4 sm:p-6">
+    <div className="min-h-screen flex items-center justify-center bg-transparent text-gray-900 py-8 px-3 sm:px-6">
+      <div className="w-full max-w-6xl mx-auto bg-white/40 bg-gradient-to-b from-white/60 via-gray-50/40 to-white/60 backdrop-blur-lg rounded-2xl shadow-xl p-4 sm:p-8 border border-gray-200">
         <h1 className="text-2xl sm:text-3xl font-bold mb-3 text-center px-2">Escanciador de Sidra Automático Recargable</h1>
         <p className="text-sm sm:text-base text-gray-700 text-center max-w-3xl mx-auto mb-8">
           El escanciador de sidra automático que combina diseño, comodidad y precisión.
@@ -95,7 +98,7 @@ export default function ProductoClient({ initialProducts }) {
         {productoSeleccionado ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-2 shadow-[0_8px_20px_rgba(15,23,42,0.06)]">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-2 shadow-[0_8px_40px_rgba(15,23,42,0.18)]">
                 <div className="relative h-[320px] overflow-hidden rounded-lg bg-slate-100 lg:h-[550px]">
                   <img
                     src={imagenPrincipal}

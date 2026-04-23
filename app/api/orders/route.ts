@@ -4,6 +4,7 @@ import { createOrderRecord } from '@/lib/order-service'
 import { parsePaymentMethod } from '@/lib/payment-methods'
 import { getMaintenanceMode } from '@/lib/maintenance-mode'
 import { sendOrderTransactionalEmail } from '@/lib/transactional-email'
+import { sendOrderWhatsappNotification } from '@/lib/whatsapp-notification'
 
 /**
  * POST /api/orders
@@ -62,6 +63,7 @@ export async function POST(req: NextRequest) {
     })
 
     await sendOrderTransactionalEmail(order.id, 'order-created')
+    await sendOrderWhatsappNotification(order.id)
 
     return NextResponse.json(
       { success: true, order },

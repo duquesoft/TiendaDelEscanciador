@@ -31,7 +31,15 @@ function subscribeToCart(onStoreChange) {
   };
 }
 
+
+
 export default function Carrito() {
+  useEffect(() => {
+    document.body.classList.add("no-leaves-bg");
+    return () => {
+      document.body.classList.remove("no-leaves-bg");
+    };
+  }, []);
   const cartSnapshot = useSyncExternalStore(subscribeToCart, getStoredCartSnapshot, () => "[]");
   const carrito = useMemo(() => {
     try {

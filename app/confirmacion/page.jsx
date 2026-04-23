@@ -15,7 +15,7 @@ export default function Confirmacion({ searchParams }) {
 
   return (
     <div className="max-w-3xl mx-auto p-6 text-center">
-      <ConfirmacionClient />
+      <ConfirmacionClient orderId={searchParams?.order_id} />
 
       <h2 className="text-3xl font-bold mb-4">¡Gracias por tu compra!</h2>
 

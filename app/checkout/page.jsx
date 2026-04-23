@@ -12,7 +12,15 @@ import {
 } from '@/lib/payment-methods'
 import { emptyShippingDetails } from '@/lib/shipping'
 
+
+
 export default function Checkout() {
+  useEffect(() => {
+    document.body.classList.add("no-leaves-bg");
+    return () => {
+      document.body.classList.remove("no-leaves-bg");
+    };
+  }, []);
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -150,8 +158,13 @@ export default function Checkout() {
       localStorage.removeItem("carrito")
       window.dispatchEvent(new Event("carrito-actualizado"))
 
-      // Redirigir a confirmación
-      router.push(`/confirmacion?payment=${paymentMethod}`)
+      // Redirigir a confirmación, incluir order_id si la API devolvió la orden
+      const orderId = data?.order?.id
+      if (orderId) {
+        router.push(`/confirmacion?order_id=${orderId}&payment=${paymentMethod}`)
+      } else {
+        router.push(`/confirmacion?payment=${paymentMethod}`)
+      }
 
     } catch (err) {
       setError('Error al procesar el pedido')
@@ -185,6 +198,10 @@ export default function Checkout() {
                 Para finalizar la compra tienes que iniciar sesión.
                 <Link href="/login?redirect=/checkout" className="ml-1 font-semibold underline underline-offset-2 hover:text-amber-900">
                   Iniciar sesión
+                </Link>
+                {' '}o
+                <Link href="/signup?redirect=/checkout" className="ml-1 font-semibold underline underline-offset-2 hover:text-amber-900">
+                  Registrarse
                 </Link>
               </div>
             )}

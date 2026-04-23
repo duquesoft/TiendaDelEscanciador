@@ -7,8 +7,8 @@ export default function AvisoLegalPage() {
         <div className="space-y-6 text-gray-800 text-base md:text-lg">
           <div>
             <h2 className="text-xl font-semibold text-green-900 mb-2">Identificación del Responsable</h2>
-            <p className="mb-2">Nombre: Tienda del Escanciador (www.TiendaDelEscanciador.com)</p>
-            <p className="mb-2">Domicilio: [Inserta tu dirección aquí]</p>
+            <p className="mb-2">Nombre: Fco. Javier Duque</p>
+            <p className="mb-2">Domicilio: c/ Alfonso de Castro, 47, Bajo Iz. 37005, Salamanca</p>
             <p className="mb-2">Correo electrónico: contacto@tiendadelescanciador.com</p>
           </div>
           <div>
