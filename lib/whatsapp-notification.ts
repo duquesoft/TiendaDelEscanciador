@@ -32,12 +32,12 @@ async function getAdminWhatsappNumber(): Promise<string | null> {
   return typeof data.value === 'string' ? data.value.trim() : null
 }
 
-async function getOrderDetails(orderId: string): Promise<{ total: number } | null> {
+async function getOrderDetails(orderId: string): Promise<{ total: number; createdAt: string; userName: string; userPhone: string } | null> {
   const supabaseAdmin = createAdminClient()
 
   const { data: order, error } = await supabaseAdmin
     .from('orders')
-    .select('total')
+    .select('total, created_at, user_id')
     .eq('id', orderId)
     .single()
 
@@ -46,7 +46,24 @@ async function getOrderDetails(orderId: string): Promise<{ total: number } | nul
     return null
   }
 
-  return { total: order.total }
+  // Obtener datos del usuario
+  const { data: user, error: userError } = await supabaseAdmin
+    .from('users')
+    .select('name, phone')
+    .eq('id', order.user_id)
+    .single()
+
+  if (userError || !user) {
+    console.error('Error obteniendo datos del usuario:', userError)
+    return null
+  }
+
+  return {
+    total: order.total,
+    createdAt: order.created_at,
+    userName: user.name || 'Cliente',
+    userPhone: user.phone || 'No disponible'
+  }
 }
 
 export async function sendOrderWhatsappNotification(orderId: string) {
@@ -70,7 +87,22 @@ export async function sendOrderWhatsappNotification(orderId: string) {
 
   const phone = adminNumber.replace(/\D/g, '') // Limpiar el número
   const phoneWithPlus = phone.startsWith('+') ? phone : `+${phone}` // Agregar + si no lo tiene
-  const text = encodeURIComponent(`Nuevo pedido recibido: ${formatOrderNumber(orderId)}, Total: ${formatCurrency(orderDetails.total)}`)
+  
+  // Formatear fecha y hora
+  const orderDate = new Date(orderDetails.createdAt)
+  const formattedDate = orderDate.toLocaleDateString('es-ES', { 
+    day: '2-digit', 
+    month: '2-digit', 
+    year: 'numeric' 
+  })
+  const formattedTime = orderDate.toLocaleTimeString('es-ES', { 
+    hour: '2-digit', 
+    minute: '2-digit'
+  })
+  
+  const text = encodeURIComponent(
+    `Nuevo pedido recibido:\n\nPedido: ${formatOrderNumber(orderId)}\nCliente: ${orderDetails.userName}\nTeléfono: ${orderDetails.userPhone}\nFecha: ${formattedDate}\nHora: ${formattedTime}\nTotal: ${formatCurrency(orderDetails.total)}`
+  )
   const url = `https://api.callmebot.com/whatsapp.php?phone=${phoneWithPlus}&text=${text}&apikey=${callmebotApiKey}`
 
   try {
